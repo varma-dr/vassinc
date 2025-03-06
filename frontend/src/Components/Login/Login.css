@@ -1,0 +1,225 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    background: #ffffff;
+    padding: 40px 30px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    position: relative;
+    border: 2px solid #3c009d;
+    border-top: 5px solid #3c009d;
+  }
+  
+  .form-content {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .company-badge {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    padding: 10px 25px;
+    border-radius: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid white;
+    z-index: 10;
+  }
+  
+  .company-name {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  
+  .company-underline {
+    width: 40px;
+    height: 3px;
+    background: #ffffff;
+    border-radius: 9px;
+    margin-bottom: 2px;
+  }
+  
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    margin-top: 20px;
+    position: relative;
+  }
+  
+  .text {
+    color: #3c009d;
+    font-size: 36px;
+    font-weight: 700;
+  }
+  
+  .underline {
+    width: 80px;
+    height: 5px;
+    background: #3c009d;
+    border-radius: 9px;
+  }
+  
+  .inputs {
+    margin-top: 45px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    align-items: center;
+  }
+  
+  .input {
+    display: flex;
+    align-items: center;
+    width: 480px;
+    height: 55px;
+    background: #f7f7f7;
+    border-radius: 10px;
+    border: 1px solid #eeeeee;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .input:focus-within {
+    border-color: #3c009d;
+    box-shadow: 0 0 0 3px rgba(60, 0, 157, 0.1);
+    background: #ffffff;
+  }
+  
+  .input i {
+    margin: 0px 20px;
+    color: #3c009d;
+    font-size: 18px;
+  }
+  
+  .input input {
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #333;
+    font-size: 16px;
+    padding-right: 50px;
+  }
+  
+  .input input::placeholder {
+    color: #aaa;
+  }
+  
+  .password-toggle {
+    position: absolute;
+    right: 20px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
+  
+  .password-toggle:hover {
+    color: #3c009d;
+  }
+  
+  .forgot-password {
+    margin-top: 25px;
+    color: #555;
+    font-size: 14px;
+    width: 480px;
+    text-align: right;
+  }
+  
+  .forgot-password span {
+    color: #4c00b4;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 5px;
+  }
+  
+  .signup-prompt {
+    margin-top: 15px;
+    color: #555;
+    font-size: 14px;
+    text-align: center;
+    width: 480px;
+  }
+  
+  .signup-prompt span {
+    color: #4c00b4;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 5px;
+  }
+  
+  .submit-container {
+    display: flex;
+    justify-content: center;
+    margin: 40px 0 10px;
+    width: 100%;
+  }
+  
+  .submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 250px;
+    height: 55px;
+    color: #fff;
+    background: #3c009d;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(60, 0, 157, 0.2);
+  }
+  
+  .submit:hover {
+    background: #4c00b4;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(60, 0, 157, 0.25);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .container {
+      width: 95%;
+      max-width: 500px;
+    }
+  
+    .input,
+    .forgot-password,
+    .signup-prompt {
+      width: 90%;
+      max-width: 480px;
+    }
+  
+    .text {
+      font-size: 30px;
+    }
+  }
