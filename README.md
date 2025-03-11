@@ -1,8 +1,8 @@
-[ ] GITHUB TEST
+-[ ] GITHUB TEST
 
-[ ] GITHUB TEST 1
+-[ ] GITHUB TEST 1
 
-[ ] GITHUB TEST 2
+-[ ] GITHUB TEST 2
 
 ---
 # Vass INC 🚀
