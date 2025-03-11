@@ -4,6 +4,8 @@
 
 - [ ] GITHUB TEST 2
 
+- [ ] GITHUB TEST 3
+
 ---
 # Vass INC 🚀
 
