@@ -1,6 +1,6 @@
 - [ ] GITHUB TEST
 
-- [ ] GITHUB TEST 1
+- [x] GITHUB TEST 1
 
 - [ ] GITHUB TEST 2
 
