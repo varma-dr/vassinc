@@ -34,3 +34,8 @@ and give following inputs
 
 ##### Follow Those 6 steps and it should work.
 
+# MongoDB connection example with my username and password: (This is stored in .env file)
+
+> PORT=5500
+
+>MONGO_URI="mongodb+srv://varmadr16:t8tAcNUljFQYW9Jp@vassinc.mu3zc.mongodb.net/?retryWrites=true&w=majority&appName=vassinc"
