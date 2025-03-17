@@ -3,6 +3,8 @@
 
 ## A website for admins, employees, and staff to manage employee records and administrative tasks efficiently.
 
+##
+
 ## 1) Create folder on desktop and pull that into Vs code 
 
 ## 2) Open terminal and type 
