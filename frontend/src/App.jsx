@@ -1,33 +1,12 @@
-import { useEffect, useState } from "react";
-
-
 function App() {
-  const [candidates, setCandidates] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('http://localhost:5500');
-        const data = await res.json();
-        setCandidates(data.candidates);
-        console.log(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    
-    fetchData();
-  }, []);
-
   return (
-    <>
-    {candidates.map((candidate) => (
-      <div key={candidate.id}>
-        <h2>{candidate.name}</h2>
-        <p>{candidate.email}</p>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="rounded-lg bg-white p-8 shadow-lg">
+        <h1 className="text-3xl font-bold text-green-700">Welcome To VASS INC.</h1>
+        <p className="mt-2 text-gray-600">Tailwind CSS is working!</p>
       </div>
-    ))}
-    </>
-  );
+    </div>
+  )
 }
 
-export default App;
+export default App
