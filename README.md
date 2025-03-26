@@ -48,7 +48,6 @@ VASS INC Recruitment Management System streamlines the process of matching candi
 - Comparative performance dashboards
 
 ## 🛠️ Tech Stack
-
 - **Frontend**: React with Tailwind CSS
 - **Backend**: Not Yet Decided
 - **Database**: Not Yet Decided
@@ -56,7 +55,6 @@ VASS INC Recruitment Management System streamlines the process of matching candi
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 - Node.js (v14 or later)
 - npm (v6 or later)
 - Git
@@ -64,64 +62,116 @@ VASS INC Recruitment Management System streamlines the process of matching candi
 ### Installation
 
 1. Clone the repository
+```
+git clone https://github.com/varma-dr/vassinc.git
+cd vassinc
+```
+
+2. Create and set up the frontend
+```
+npm create vite@latest
+# Select 'frontend' as the project name
+# Select 'React' as the framework
+# Select 'JavaScript' as the variant
+cd frontend
+npm install
+```
+
+3. Install Tailwind CSS v3
+```
+npm install -D tailwindcss@3.3.5 postcss autoprefixer
+npx tailwindcss init -p
+```
+
+4. Configure Tailwind CSS
+   
+   Update `tailwind.config.js`:
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+5. Add Tailwind directives to CSS
+   
+   Replace the contents of `src/index.css` with:
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+6. Make sure your `src/main.jsx` imports the CSS:
+```javascript
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+```
+
+7. Start the development server
+```
+npm run dev
+```
+
+8. Open your browser and navigate to `http://localhost:5173`
+
+### 🧪 Testing Tailwind CSS
+
+To verify Tailwind CSS is working properly, update your `src/index.css`:
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+Then update your `App.jsx`:
+
+```jsx
+function App() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="rounded-lg bg-white p-8 shadow-lg">
+        <h1 className="text-3xl font-bold text-blue-500">VASS INC</h1>
+        <p className="mt-4 text-green-600">Tailwind CSS is working correctly!</p>
+      </div>
+    </div>
+  )
+}
+export default App
+
+export default App
+```
+
+## 🐛 Troubleshooting
+
+If you encounter issues with Tailwind CSS:
+
+1. Check that all configuration files are in the correct locations
+2. Verify that `index.css` is being properly imported in `main.jsx`
+3. Make sure the content array in `tailwind.config.js` includes all file paths where you use Tailwind classes
+4. Ensure you're using Tailwind CSS v3.3.5 for maximum compatibility
+5. If HMR (Hot Module Replacement) is working properly, you'll see updates in the terminal like:
    ```
-   git clone https://github.com/varma-dr/vassinc.git
-   cd vassinc
+   [vite] (client) hmr update /src/App.jsx, /src/index.css
    ```
 
-2. Install frontend dependencies
-   ```
-   cd frontend
-   npm install
-   ```
+## 🤝 Contributing
 
-3. Start the development server
-   ```
-   npm run dev
-   ```
-
-4. Open your browser and navigate to `http://localhost:5173`
-
-### 🎨 Setting Up Tailwind CSS
-
-If you need to rebuild the Tailwind configuration:
-
-1. Create or update the Tailwind config file
-   ```
-   cd frontend
-   ```
-
-2. Create `tailwind.config.js` with the following content:
-   ```javascript
-   /** @type {import('tailwindcss').Config} */
-   export default {
-     content: [
-       "./index.html",
-       "./src/**/*.{js,jsx,ts,tsx}",
-     ],
-     theme: {
-       extend: {},
-     },
-     plugins: [],
-   }
-   ```
-
-3. Create `postcss.config.js` with:
-   ```javascript
-   export default {
-     plugins: {
-       tailwindcss: {},
-       autoprefixer: {},
-     },
-   }
-   ```
-
-4. Ensure `src/index.css` contains:
-   ```css
-   @tailwind base;
-   @tailwind components;
-   @tailwind utilities;
-   ```
-
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 Project Link: [https://github.com/varma-dr/vassinc](https://github.com/varma-dr/vassinc)
