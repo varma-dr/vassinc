@@ -11,13 +11,3 @@ function App() {
 
 export default App
 
-// githubtest 
-// Test - GIT
-// git test again
-
-// gittest123
-
-// gittestlast
-
-
-// FINAL TEST
