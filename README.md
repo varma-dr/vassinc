@@ -157,21 +157,5 @@ export default App
 export default App
 ```
 
-## 🐛 Troubleshooting
-
-If you encounter issues with Tailwind CSS:
-
-1. Check that all configuration files are in the correct locations
-2. Verify that `index.css` is being properly imported in `main.jsx`
-3. Make sure the content array in `tailwind.config.js` includes all file paths where you use Tailwind classes
-4. Ensure you're using Tailwind CSS v3.3.5 for maximum compatibility
-5. If HMR (Hot Module Replacement) is working properly, you'll see updates in the terminal like:
-   ```
-   [vite] (client) hmr update /src/App.jsx, /src/index.css
-   ```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 Project Link: [https://github.com/varma-dr/vassinc](https://github.com/varma-dr/vassinc)
