@@ -50,7 +50,7 @@ VASS INC Recruitment Management System streamlines the process of matching candi
 ## 🛠️ Tech Stack
 - **Frontend**: React with Tailwind CSS
 - **Backend**: Not Yet Decided
-- **Database**: Not Yet Decided
+- **Database**: MongoDB
 
 ## 🚀 Getting Started
 
