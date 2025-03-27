@@ -58,7 +58,6 @@ VASS INC Recruitment Management System streamlines the process of matching candi
 - Node.js (v14 or later)
 - npm (v6 or later)
 - Git
-- Check Tailwind 
 
 ### Installation
 
