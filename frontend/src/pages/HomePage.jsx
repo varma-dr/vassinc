@@ -12,9 +12,9 @@ const HomePage = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-700 to-blue-600">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 to-blue-600">
       {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 
       {/* Glassmorphism Card */}
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg p-8 md:p-10 rounded-2xl shadow-lg text-white w-full max-w-md">
@@ -52,17 +52,6 @@ const HomePage = () => {
               className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
               required 
             />
-          </div>
-
-          {/* Remember Me & Forgot Password */}
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center">
-              <input type="checkbox" className="mr-2 bg-transparent" />
-              Remember Me
-            </label>
-            <Link to="/forgot-password" className="hover:underline text-yellow-300">
-              Forgot Password?
-            </Link>
           </div>
 
           {/* Login Button */}
