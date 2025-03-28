@@ -1,23 +1,40 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
-import Logo from "../assets/logo.jpg";  // Ensure the path is correct
+import Logo from "../assets/VassInc logo.png";  
 
 const HomePage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Logging in with", email, password);
-    setIsLoggedIn(true); // Simulating a successful login
-  };
 
   // Set the page title dynamically
   useEffect(() => {
     document.title = "VASS INC - Login";
   }, []);
+
+  // Regular expression for validating email format
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    let isValid = true;
+
+    // Email validation
+    if (!email) {
+      setEmailError("Email is required.");
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      isValid = false;
+    } else {
+      setEmailError("");
+    }
+
+    
+  };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 to-blue-600">
@@ -30,7 +47,7 @@ const HomePage = () => {
         {/* VASS INC Branding */}
         <div className="text-center mb-4">
           {/* Display Logo */}
-          <img src={Logo} alt="VASS INC Logo" className="mx-auto w-24 h-24 mb-4" />
+          <img src={Logo} alt="VASS INC Logo" className="mx-auto w-34 h-34 mb-6" />
         </div>
         <h1 className="text-4xl font-extrabold text-center mb-2 text-yellow-300">
           VASS INC
@@ -58,9 +75,10 @@ const HomePage = () => {
               className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
               required 
             />
+            {emailError && (
+              <p className="text-red-500 text-sm mt-2">{emailError}</p>
+            )}
           </div>
-
-          
 
           {/* Login Button */}
           <button 
