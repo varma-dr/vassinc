@@ -1,14 +1,39 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
+import Logo from "../assets/VassInc logo.png";  
 
 const HomePage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Set the page title dynamically
+  useEffect(() => {
+    document.title = "VASS INC - Login";
+  }, []);
+
+  // Regular expression for validating email format
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Logging in with", email, password);
+    
+    let isValid = true;
+
+    // Email validation
+    if (!email) {
+      setEmailError("Email is required.");
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      isValid = false;
+    } else {
+      setEmailError("");
+    }
+
+    
   };
 
   return (
@@ -20,10 +45,21 @@ const HomePage = () => {
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg p-8 md:p-10 rounded-2xl shadow-lg text-white w-full max-w-md">
         
         {/* VASS INC Branding */}
+        <div className="text-center mb-4">
+          {/* Display Logo */}
+          <img src={Logo} alt="VASS INC Logo" className="mx-auto w-34 h-34 mb-6" />
+        </div>
         <h1 className="text-4xl font-extrabold text-center mb-2 text-yellow-300">
           VASS INC
         </h1>
         <h2 className="text-2xl font-semibold text-center mb-6">Employee Login</h2>
+
+        {/* Welcome Message */}
+        {isLoggedIn && (
+          <div className="text-center mb-8 text-yellow-300">
+            <h3>Welcome!!</h3>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -39,19 +75,9 @@ const HomePage = () => {
               className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
               required 
             />
-          </div>
-
-          {/* Password Field */}
-          <div className="relative">
-            <FaLock className="absolute left-4 top-4 text-yellow-300" />
-            <input 
-              type="password" 
-              placeholder="Password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-              required 
-            />
+            {emailError && (
+              <p className="text-red-500 text-sm mt-2">{emailError}</p>
+            )}
           </div>
 
           {/* Login Button */}
