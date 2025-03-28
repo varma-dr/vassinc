@@ -1,29 +1,82 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { FaUser, FaLock } from "react-icons/fa";
 
 const HomePage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Logging in with", email, password);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-r from-indigo-600 to-blue-600 flex flex-col items-center justify-center text-white">
-      <header className="text-center px-6 md:px-12">
-        <h1 className="text-6xl font-extrabold mb-4">VASS INC - Employee Management System</h1>
-        <p className="text-lg mb-8 max-w-2xl mx-auto">
-          Streamline recruitment and employee management effortlessly with cutting-edge technology and a user-friendly interface.
-        </p>
-        
-        <div className="flex justify-center gap-6">
-          <Link 
-            to="/register" 
-            className="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold shadow-md hover:bg-indigo-500 hover:text-white transition-all duration-300 transform hover:scale-105"
-          >
-            Get Started
-          </Link>
-          <Link 
-            to="/login" 
-            className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition-all duration-300 transform hover:scale-105"
+    <div className="relative min-h-screen flex items-center justify-center bg-cover bg-center" 
+         style={{ backgroundImage: "url('https://source.unsplash.com/1600x900/?technology,office')" }}>
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+
+      {/* Glassmorphism Card */}
+      <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg p-8 md:p-10 rounded-2xl shadow-lg text-white w-full max-w-md">
+        <h2 className="text-3xl font-bold text-center mb-6">Login</h2>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Email Field */}
+          <div className="relative">
+            <FaUser className="absolute left-4 top-4 text-gray-300" />
+            <input 
+              type="email" 
+              placeholder="Email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              required 
+            />
+          </div>
+
+          {/* Password Field */}
+          <div className="relative">
+            <FaLock className="absolute left-4 top-4 text-gray-300" />
+            <input 
+              type="password" 
+              placeholder="Password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              required 
+            />
+          </div>
+
+          {/* Remember Me & Forgot Password */}
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center">
+              <input type="checkbox" className="mr-2 bg-transparent" />
+              Remember Me
+            </label>
+            <Link to="/forgot-password" className="hover:underline text-blue-300">
+              Forgot Password?
+            </Link>
+          </div>
+
+          {/* Login Button */}
+          <button 
+            type="submit" 
+            className="w-full bg-blue-500 hover:bg-blue-700 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
           >
             Login
+          </button>
+        </form>
+
+        {/* Register Link */}
+        <p className="text-center mt-6 text-gray-300">
+          Don't have an account? 
+          <Link to="/register" className="text-blue-300 hover:underline ml-2">
+            Sign Up
           </Link>
-        </div>
-      </header>
+        </p>
+      </div>
     </div>
   );
 };
