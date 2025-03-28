@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaLock } from "react-icons/fa";
+import { FaUser, FaLock, FaEye, FaEyeSlash} from "react-icons/fa";
 import Logo from "../assets/VassInc logo.png";  
 
 const HomePage = () => {
@@ -8,14 +8,23 @@ const HomePage = () => {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState("");
 
   // Set the page title dynamically
   useEffect(() => {
     document.title = "VASS INC - Login";
   }, []);
 
-  // Regular expression for validating email format
+  // Email validation function
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  // Password strength validation function
+  const validatePasswordStrength = (password) => {
+    return /[A-Z]/.test(password) ? "Strong" : "Weak";
+  };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,6 +42,23 @@ const HomePage = () => {
       setEmailError("");
     }
 
+    // Password validation
+    if (!password) {
+      setPasswordError("Password is required.");
+      isValid = false;
+    } else if (validatePasswordStrength(password) === "Weak") {
+      setPasswordError("Password must contain at least one uppercase letter.");
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    if (isValid) {
+      setIsLoggedIn(true);
+      console.log("Login Successful", { email, password });
+    }
+  
+
     
   };
 
@@ -47,12 +73,12 @@ const HomePage = () => {
         {/* VASS INC Branding */}
         <div className="text-center mb-4">
           {/* Display Logo */}
-          <img src={Logo} alt="VASS INC Logo" className="mx-auto w-34 h-34 mb-6" />
+          <img src={Logo} alt="VASS INC Logo" className="mx-auto w-24 h-24 mb-6" />
         </div>
         <h1 className="text-4xl font-extrabold text-center mb-2 text-yellow-300">
           VASS INC
         </h1>
-        <h2 className="text-2xl font-semibold text-center mb-6">Employee Login</h2>
+        <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
 
         {/* Welcome Message */}
         {isLoggedIn && (
@@ -79,6 +105,28 @@ const HomePage = () => {
               <p className="text-red-500 text-sm mt-2">{emailError}</p>
             )}
           </div>
+
+          {/* Password Field */}
+          <div className="relative">
+            <FaLock className="absolute left-4 top-4 text-yellow-300" />
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full pl-12 pr-10 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+              required 
+            />
+            <button 
+              type="button"
+              className="absolute right-4 top-4 text-yellow-300"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+            {passwordError && <p className="text-red-400 mt-1">{passwordError}</p>}
+          </div>
+
 
           {/* Login Button */}
           <button 
