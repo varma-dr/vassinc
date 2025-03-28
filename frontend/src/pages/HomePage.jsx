@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
+import Logo from "../assets/logo.jpg";  // Ensure this path is correct
 
 const HomePage = () => {
   const [email, setEmail] = useState("");
@@ -20,6 +21,10 @@ const HomePage = () => {
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg p-8 md:p-10 rounded-2xl shadow-lg text-white w-full max-w-md">
         
         {/* VASS INC Branding */}
+        <div className="text-center mb-4">
+          {/* Display Logo */}
+          <img src={Logo} alt="VASS INC Logo" className="mx-auto w-24 h-24 mb-4" />
+        </div>
         <h1 className="text-4xl font-extrabold text-center mb-2 text-yellow-300">
           VASS INC
         </h1>
