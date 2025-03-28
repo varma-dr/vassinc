@@ -12,7 +12,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-200 to-blue-600">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 to-blue-600">
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 
