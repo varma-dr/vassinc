@@ -11,6 +11,7 @@ const HomePage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState("");
+  const [userType, setUserType] = useState("");
 
   // Set the page title dynamically
   useEffect(() => {
@@ -126,6 +127,22 @@ const HomePage = () => {
             </button>
             {passwordError && <p className="text-red-400 mt-1">{passwordError}</p>}
           </div>
+
+          {/* User Type Dropdown */}
+          <div className="relative">
+            <select
+              value={userType}
+              onChange={(e) => setUserType(e.target.value)}
+              className="w-full pl-4 pr-4 py-3 rounded-lg bg-indigo-100 text-indigo-900 placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+            >
+              <option value="" disabled>Select User Type</option>
+              <option value="candidate">Candidate</option>
+              <option value="recruiter">Recruiter</option>
+              <option value="employee">Employee</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
 
 
           {/* Login Button */}
