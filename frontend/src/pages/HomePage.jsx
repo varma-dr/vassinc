@@ -1,16 +1,23 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
-import Logo from "../assets/logo.jpg";  // Ensure this path is correct
+import Logo from "../assets/logo.jpg";  // Ensure the path is correct
 
 const HomePage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Logging in with", email, password);
+    setIsLoggedIn(true); // Simulating a successful login
   };
+
+  // Set the page title dynamically
+  useEffect(() => {
+    document.title = "VASS INC - Login";
+  }, []);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 to-blue-600">
@@ -30,6 +37,13 @@ const HomePage = () => {
         </h1>
         <h2 className="text-2xl font-semibold text-center mb-6">Employee Login</h2>
 
+        {/* Welcome Message */}
+        {isLoggedIn && (
+          <div className="text-center mb-8 text-yellow-300">
+            <h3>Welcome!!</h3>
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           
@@ -46,18 +60,7 @@ const HomePage = () => {
             />
           </div>
 
-          {/* Password Field */}
-          <div className="relative">
-            <FaLock className="absolute left-4 top-4 text-yellow-300" />
-            <input 
-              type="password" 
-              placeholder="Password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-              required 
-            />
-          </div>
+          
 
           {/* Login Button */}
           <button 
