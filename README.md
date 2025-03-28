@@ -157,5 +157,9 @@ export default App
 export default App
 ```
 
+9.📁 Frontend 
+- The `pages/` folder contains different views/screens for the application.
+
+
 
 Project Link: [https://github.com/varma-dr/vassinc](https://github.com/varma-dr/vassinc)
