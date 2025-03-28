@@ -12,39 +12,44 @@ const HomePage = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-cover bg-center" 
-         style={{ backgroundImage: "url('https://source.unsplash.com/1600x900/?technology,office')" }}>
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-700 to-blue-600">
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
       {/* Glassmorphism Card */}
       <div className="relative z-10 bg-white bg-opacity-10 backdrop-blur-lg p-8 md:p-10 rounded-2xl shadow-lg text-white w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center mb-6">Login</h2>
+        
+        {/* VASS INC Branding */}
+        <h1 className="text-4xl font-extrabold text-center mb-2 text-yellow-300">
+          VASS INC
+        </h1>
+        <h2 className="text-2xl font-semibold text-center mb-6">Employee Login</h2>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          
           {/* Email Field */}
           <div className="relative">
-            <FaUser className="absolute left-4 top-4 text-gray-300" />
+            <FaUser className="absolute left-4 top-4 text-yellow-300" />
             <input 
               type="email" 
-              placeholder="Email" 
+              placeholder="Email Address" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
               required 
             />
           </div>
 
           {/* Password Field */}
           <div className="relative">
-            <FaLock className="absolute left-4 top-4 text-gray-300" />
+            <FaLock className="absolute left-4 top-4 text-yellow-300" />
             <input 
               type="password" 
               placeholder="Password" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-white placeholder-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
               required 
             />
           </div>
@@ -55,7 +60,7 @@ const HomePage = () => {
               <input type="checkbox" className="mr-2 bg-transparent" />
               Remember Me
             </label>
-            <Link to="/forgot-password" className="hover:underline text-blue-300">
+            <Link to="/forgot-password" className="hover:underline text-yellow-300">
               Forgot Password?
             </Link>
           </div>
@@ -63,7 +68,7 @@ const HomePage = () => {
           {/* Login Button */}
           <button 
             type="submit" 
-            className="w-full bg-blue-500 hover:bg-blue-700 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+            className="w-full bg-yellow-400 text-indigo-900 font-bold py-3 rounded-lg shadow-md hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105"
           >
             Login
           </button>
@@ -72,7 +77,7 @@ const HomePage = () => {
         {/* Register Link */}
         <p className="text-center mt-6 text-gray-300">
           Don't have an account? 
-          <Link to="/register" className="text-blue-300 hover:underline ml-2">
+          <Link to="/register" className="text-yellow-300 hover:underline ml-2">
             Sign Up
           </Link>
         </p>
