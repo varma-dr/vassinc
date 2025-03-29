@@ -166,23 +166,14 @@ const HomePage = () => {
         </form>
 
         {/* Register Link */}
-        <div className="mt-2">
-            <p className="text-gray-300 text-sm">Register as:</p>
-            <div className="flex flex-wrap justify-center gap-4 mt-1">
-              <Link to="/register/candidate" className="text-yellow-300 hover:underline text-sm">
-                Candidate
-              </Link>
-              <Link to="/register/recruiter" className="text-yellow-300 hover:underline text-sm">
-                Recruiter
-              </Link>
-              <Link to="/register/employee" className="text-yellow-300 hover:underline text-sm">
-                Employee
-              </Link>
-            </div>
-          </div>
-        </div>
+        <p className="text-center mt-6 text-gray-300">
+          Don't have an account? 
+          <Link to="/register" className="text-yellow-300 hover:underline ml-2">
+            Sign Up
+          </Link>
+        </p>
       </div>
-    
+    </div>
   );
 };
 
