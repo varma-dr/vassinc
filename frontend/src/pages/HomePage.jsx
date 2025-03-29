@@ -12,6 +12,7 @@ const HomePage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState("");
   const [userType, setUserType] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Set the page title dynamically
   useEffect(() => {
@@ -141,6 +142,18 @@ const HomePage = () => {
               <option value="employee">Employee</option>
               <option value="admin">Admin</option>
             </select>
+          </div>
+
+          {/* Remember Me Checkbox */}
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={() => setRememberMe(!rememberMe)}
+              className="w-4 h-4 text-yellow-400 border-gray-300 rounded focus:ring-yellow-400"
+            />
+            <label htmlFor="rememberMe" className="ml-2 text-gray-300">Remember me</label>
           </div>
 
 
