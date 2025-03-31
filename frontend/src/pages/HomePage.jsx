@@ -1,11 +1,18 @@
+<<<<<<< Updated upstream
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaUser, FaLock, FaEye, FaEyeSlash} from "react-icons/fa";
 import Logo from "../assets/VassInc logo.png";  
+=======
+import { href, Link } from "react-router-dom";
+import { useState } from "react";
+import { FaUser, FaLock } from "react-icons/fa";
+>>>>>>> Stashed changes
 
 const HomePage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+<<<<<<< Updated upstream
   const [emailError, setEmailError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [passwordError, setPasswordError] = useState("");
@@ -27,6 +34,9 @@ const HomePage = () => {
     return /[A-Z]/.test(password) ? "Strong" : "Weak";
   };
 
+=======
+  
+>>>>>>> Stashed changes
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,7 +73,11 @@ const HomePage = () => {
   };
 
   return (
+<<<<<<< Updated upstream
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 to-blue-400">
+=======
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 to-blue-600">
+>>>>>>> Stashed changes
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 
@@ -178,3 +192,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
