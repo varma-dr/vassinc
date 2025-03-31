@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { FaUser, FaEnvelope } from "react-icons/fa";  // Import FaEnvelope for the email field
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";  // Import necessary icons
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);  // State to toggle password visibility
 
   // Email Validation Regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -29,6 +31,7 @@ const RegistrationForm = () => {
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Please enter a valid email address.";
     }
+    if (!formData.password) newErrors.password = "Password is required.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0; 
@@ -85,6 +88,27 @@ const RegistrationForm = () => {
           className="w-full pl-12 pr-4 py-3 rounded-lg bg-white bg-opacity-20 text-grey placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+      </div>
+
+      {/* Password */}
+      <div className="relative">
+        <FaLock className="absolute left-4 top-4 text-gray-700 dark:text-gray-200" />
+        <input
+          type={showPassword ? "text" : "password"}  
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full pl-12 pr-10 py-3 rounded-lg bg-white bg-opacity-20 text-grey placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+        />
+        <button 
+          type="button" 
+          className="absolute right-4 top-4 text-yellow-300"
+          onClick={() => setShowPassword(!showPassword)}  
+        >
+          {showPassword ? <FaEyeSlash /> : <FaEye />}  
+        </button>
+        {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
       </div>
 
       {/* Submit Button */}
