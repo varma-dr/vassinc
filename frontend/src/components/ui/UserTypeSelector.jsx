@@ -5,9 +5,9 @@ const UserTypeSelector = ({ onSelect }) => {
   const [selectedUserType, setSelectedUserType] = useState(null);
 
   const userTypes = [
-    { type: "candidate", label: "Candidate", icon: <FaUserGraduate size={60} /> },
-    { type: "recruiter", label: "Recruiter", icon: <FaUserTie size={60} /> },
-    { type: "employee", label: "Employee", icon: <FaUsers size={60} /> },
+    { type: "candidate", label: "Candidate", icon: <FaUserGraduate size={80} /> },
+    { type: "recruiter", label: "Recruiter", icon: <FaUserTie size={80} /> },
+    { type: "employee", label: "Employee", icon: <FaUsers size={80} /> },
   ];
 
   const handleSelection = (type) => {
