@@ -1,5 +1,4 @@
 
-=======
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaUser, FaLock, FaEye, FaEyeSlash} from "react-icons/fa";
@@ -184,4 +183,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
->>>>>>> feature/registration-page
+
