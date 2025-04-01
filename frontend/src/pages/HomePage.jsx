@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaUser, FaLock, FaEye, FaEyeSlash} from "react-icons/fa";
-import Logo from "../assets/VassInc logo.png";  
+import Logo from "../assets/VassInc_logo.png";  
+
 
 const HomePage = () => {
   const [email, setEmail] = useState("");
@@ -73,7 +74,12 @@ const HomePage = () => {
         {/* VASS INC Branding */}
         <div className="text-center mb-4">
           {/* Display Logo */}
-          <img src={Logo} alt="VASS INC Logo" className="mx-auto w-56 h-40 mb-2 drop-shadow-lg" />
+          <img 
+            src={Logo} 
+            alt="VASS INC Logo" 
+            className="mx-auto w-56 h-40 mb-2 drop-shadow-lg"
+            onError={(e) => console.error("Logo failed to load:", e)} 
+          />
         </div>
         <h1 className="text-4xl font-extrabold text-center mb-1 text-yellow-300">
           VASS INC
@@ -153,8 +159,6 @@ const HomePage = () => {
             />
             <label htmlFor="rememberMe" className="ml-2 text-gray-300">Remember me</label>
           </div>
-
-
 
           {/* Login Button */}
           <button 

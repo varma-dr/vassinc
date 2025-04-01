@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom"; 
+import Logo from "../../assets/VassInc_logo.png"; // Corrected path
 
-const RegistrationForm = ({ logo }) => {  
+const RegistrationForm = () => {  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -63,7 +64,12 @@ const RegistrationForm = ({ logo }) => {
         {/* VASS INC Branding */}
         <div className="text-center mb-4">
           {/* Display Logo */}
-          <img src={logo} alt="VASS INC Logo" className="mx-auto w-56 h-40 mb-2 drop-shadow-lg" />
+          <img 
+            src={Logo} 
+            alt="VASS INC Logo" 
+            className="mx-auto w-56 h-40 mb-2 drop-shadow-lg" 
+            onError={(e) => console.error("Logo failed to load:", e)}
+          />
         </div>
         
         <h1 className="text-4xl font-extrabold text-center mb-1 text-yellow-300">
