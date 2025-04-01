@@ -3,7 +3,7 @@ import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom"; 
 import Logo from "../../assets/VassInc_logo.png"; 
 
-const RegistrationForm = () => {  
+const SignUpForm = () => {  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -173,7 +173,7 @@ const RegistrationForm = () => {
           <div className="text-center mt-6 text-gray-300">
             <p>
               Already have an account?{" "}
-              <Link to="/HomePage" className="text-yellow-300 hover:underline">
+              <Link to="/login" className="text-yellow-300 hover:underline">
                 Login
               </Link>
             </p>
@@ -184,4 +184,4 @@ const RegistrationForm = () => {
   );
 };
 
-export default RegistrationForm;
+export default SignUpForm;

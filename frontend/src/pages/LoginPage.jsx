@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaUser, FaLock, FaEye, FaEyeSlash} from "react-icons/fa";
-import Logo from "../assets/VassInc logo.png";
+import Logo from "../assets/VassInc_logo.png";  
+
 
 const HomePage = () => {
   const [email, setEmail] = useState("");
@@ -26,6 +28,7 @@ const HomePage = () => {
   const validatePasswordStrength = (password) => {
     return /[A-Z]/.test(password) ? "Strong" : "Weak";
   };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -58,6 +61,7 @@ const HomePage = () => {
       setIsLoggedIn(true);
       console.log("Login Successful", { email, password });
     }
+  
   };
 
   return (
@@ -71,7 +75,12 @@ const HomePage = () => {
         {/* VASS INC Branding */}
         <div className="text-center mb-4">
           {/* Display Logo */}
-          <img src={Logo} alt="VASS INC Logo" className="mx-auto w-56 h-40 mb-2 drop-shadow-lg" />
+          <img 
+            src={Logo} 
+            alt="VASS INC Logo" 
+            className="mx-auto w-56 h-40 mb-2 drop-shadow-lg"
+            onError={(e) => console.error("Logo failed to load:", e)} 
+          />
         </div>
         <h1 className="text-4xl font-extrabold text-center mb-1 text-yellow-300">
           VASS INC
@@ -161,10 +170,10 @@ const HomePage = () => {
           </button>
         </form>
 
-        {/* Register Link */}
+        {/* Sign Up Register Link */}
         <p className="text-center mt-6 text-gray-300">
           Don't have an account? 
-          <Link to="/register" className="text-yellow-300 hover:underline ml-2">
+          <Link to="/signup" className="text-yellow-300 hover:underline ml-2">
             Sign Up
           </Link>
         </p>
@@ -174,3 +183,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
