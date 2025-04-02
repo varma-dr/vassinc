@@ -1,1 +1,1 @@
-// Shashank continue using this as Lnading page
+// Shashank please continue using this as Landing Page
