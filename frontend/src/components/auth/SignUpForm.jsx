@@ -1,20 +1,26 @@
 import React, { useState } from "react";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom"; 
+import { Link, useNavigate} from "react-router-dom"; 
 import Logo from "../../assets/VassInc_logo.png"; 
 
 const SignUpForm = () => {  
+  const navigate = useNavigate(); 
+
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "", 
+    
   });
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  
 
   // Email Validation Regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -42,6 +48,13 @@ const SignUpForm = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0; 
+  };
+
+  const handleContinue = () => {
+    if (validateForm()) {
+      console.log("Form Submitted Successfully!", formData);
+      navigate("/UserTypeSelector"); // Redirect to UserTypeSelector page
+    }
   };
 
   // Handle Form Submission
@@ -163,9 +176,11 @@ const SignUpForm = () => {
           </div>
 
           {/* Submit Button */}
+          {/* Continue Registration Button */}
           <button 
-            type="submit" 
-            className="w-full bg-yellow-400 text-indigo-900 font-bold py-3 rounded-lg shadow-md hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105"
+            type="button"
+            onClick={handleContinue}  
+            className="w-full bg-yellow-400 text-indigo-900 font-bold py-3 rounded-lg shadow-md hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105 mt-6"
           >
             Continue Registration
           </button>
