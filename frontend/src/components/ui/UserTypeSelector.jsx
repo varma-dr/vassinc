@@ -68,7 +68,7 @@ const UserTypeSelector = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Validate user type selection
     if (!selectedUserType) {
       newErrors.userType = "Please select a user type";
@@ -111,43 +111,41 @@ const UserTypeSelector = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
-    
+
     if (validateForm()) {
-      
       console.log("Form submitted successfully");
       alert("Form submitted successfully!");
-      
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-100 to-blue-400">
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+    <form onSubmit={handleSubmit} className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-100 to-indigo-200 bg-subtle-texture">
+      {/* Subtle Dark Overlay (optional, can be adjusted) */}
+      <div className="absolute inset-0 bg-black bg-opacity-5"></div>
 
-      {/* Glassmorphism Card */}
-      <div className="relative z-10 bg-white bg-opacity-20 backdrop-blur-lg p-8 md:p-10 rounded-2xl shadow-lg text-white w-full max-w-md">
-        <h1 className="text-4xl font-extrabold text-center mb-4 text-yellow-300">Register As:</h1>
+      {/* Glassmorphism Card with Elegant Darker Colors - More Curved Edges and Border */}
+      <div className="relative z-10 bg-white bg-opacity-60 backdrop-blur-md p-8 md:p-10 rounded-xl shadow-md-elegant text-gray-800 w-full max-w-md border border-gray-300">
+        <h1 className="text-2xl font-medium text-center mb-6 text-gray-600">Register As:</h1>
 
         {/* User Type Selection Cards */}
         <div className="flex space-x-4 justify-center mt-6">
           {userTypes.map(({ type, label, icon }) => (
             <label
               key={type}
-              className={`cursor-pointer flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-300 shadow-md w-32 text-center transform 
-                ${selectedUserType === type ? "border-yellow-400 bg-yellow-100 bg-opacity-90 scale-105" : "border-gray-300 bg-white bg-opacity-80 hover:bg-gray-100 hover:bg-opacity-80"}
+              className={`cursor-pointer flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-300 shadow-md w-32 text-center transform
+                ${selectedUserType === type ? "border-teal-500 bg-teal-100 bg-opacity-90 scale-105" : "border-gray-300 bg-white bg-opacity-80 hover:bg-gray-100 hover:bg-opacity-80"}
                 ${submitted && errors.userType && !selectedUserType ? "border-red-500" : ""}`}
               onClick={() => handleSelection(type)}
             >
               {/* Visible radio button */}
               <div className="flex justify-end w-full mb-2">
-                <div className={`h-5 w-5 rounded-full border-2 ${selectedUserType === type ? "border-yellow-500" : "border-gray-400"} flex items-center justify-center`}>
+                <div className={`h-5 w-5 rounded-full border-2 ${selectedUserType === type ? "border-teal-500" : "border-gray-400"} flex items-center justify-center`}>
                   {selectedUserType === type && (
-                    <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
+                    <div className="h-3 w-3 rounded-full bg-teal-500"></div>
                   )}
                 </div>
               </div>
-              
+
               {/* Icon with improved contrast */}
               <div className="text-gray-800">
                 {icon}
@@ -184,7 +182,7 @@ const UserTypeSelector = () => {
                 value={candidateDetails.visaInfo}
                 onChange={handleCandidateChange}
                 placeholder="Visa Info"
-                className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-30 text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none font-medium ${
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.visaInfo ? "border-2 border-red-500" : ""
                 }`}
                 required
@@ -203,7 +201,7 @@ const UserTypeSelector = () => {
                 value={candidateDetails.specialization}
                 onChange={handleCandidateChange}
                 placeholder="Specialization"
-                className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-30 text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none font-medium ${
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.specialization ? "border-2 border-red-500" : ""
                 }`}
                 required
@@ -222,7 +220,7 @@ const UserTypeSelector = () => {
                 value={candidateDetails.education}
                 onChange={handleCandidateChange}
                 placeholder="Education"
-                className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-30 text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none font-medium ${
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.education ? "border-2 border-red-500" : ""
                 }`}
                 required
@@ -246,7 +244,7 @@ const UserTypeSelector = () => {
                 value={recruiterDetails.yearsOfExp}
                 onChange={handleRecruiterChange}
                 placeholder="Years of Experience"
-                className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-30 text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none font-medium ${
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.yearsOfExp ? "border-2 border-red-500" : ""
                 }`}
                 required
@@ -265,7 +263,7 @@ const UserTypeSelector = () => {
                 value={recruiterDetails.pastCompany}
                 onChange={handleRecruiterChange}
                 placeholder="Past Company"
-                className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-30 text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none font-medium ${
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.pastCompany ? "border-2 border-red-500" : ""
                 }`}
                 required
@@ -284,7 +282,7 @@ const UserTypeSelector = () => {
                 value={recruiterDetails.education}
                 onChange={handleRecruiterChange}
                 placeholder="Education"
-                className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-30 text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none font-medium ${
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.education ? "border-2 border-red-500" : ""
                 }`}
                 required
@@ -308,7 +306,7 @@ const UserTypeSelector = () => {
                 value={employeeDetails.companyName}
                 onChange={handleEmployeeChange}
                 placeholder="Company Name"
-                className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-30 text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none font-medium ${
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.companyName ? "border-2 border-red-500" : ""
                 }`}
                 required
@@ -327,7 +325,7 @@ const UserTypeSelector = () => {
                 value={employeeDetails.position}
                 onChange={handleEmployeeChange}
                 placeholder="Position"
-                className={`w-full px-4 py-3 rounded-lg bg-white bg-opacity-30 text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none font-medium ${
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.position ? "border-2 border-red-500" : ""
                 }`}
                 required
@@ -344,15 +342,15 @@ const UserTypeSelector = () => {
 
         {/* Note about required fields */}
         {selectedUserType && (
-          <div className="mt-2 text-sm text-white opacity-70">
-              All fields are required
+          <div className="mt-2 text-sm text-gray-600 opacity-70">
+            All fields are required
           </div>
         )}
 
         {/* Button to continue */}
-        <button 
+        <button
           type="submit"
-          className="w-full bg-yellow-400 text-indigo-900 font-bold py-3 rounded-lg shadow-md hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105 mt-6"
+          className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6"
         >
           Submit
         </button>
