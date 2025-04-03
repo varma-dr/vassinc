@@ -1,32 +1,25 @@
-import express from 'express';
-import connectDB from './config/db.js';
+const express = require('express');
+const connectDB = require('./db');
+const cors = require('cors');
+require('dotenv').config();
 
-// Initialize Express
 const app = express();
 
-// Connect to MongoDB
-connectDB().then(() => {
-  console.log('\n🎉 🚀 MongoDB Connection Successful! 🚀 🎉');
-  console.log('✅ Database connection established');
-  console.log('✅ Ready to handle API requests');
-  console.log('✅ Your backend infrastructure is now ready\n');
-}).catch(err => {
-  console.error('❌ MongoDB connection error:', err.message);
-  process.exit(1);
-});
+// Connect Database
+connectDB();
 
-// Middleware
-app.use(express.json());
+// Init Middleware
+app.use(express.json({ extended: false }));
+app.use(cors());
 
-// Define routes
+// Define Routes
+app.use('/api/users', require('./routes/users'));
+
+// Basic route for testing
 app.get('/', (req, res) => {
-  res.send('API is running');
+  res.send('API Running');
 });
 
-// Define port
-const PORT = process.env.PORT || 5006;
+const PORT = process.env.PORT || 5000;
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🌐 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
