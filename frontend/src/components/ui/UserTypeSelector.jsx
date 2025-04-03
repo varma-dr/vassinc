@@ -26,6 +26,7 @@ const UserTypeSelector = () => {
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const cardSpacing = 16;
+    const [termsAccepted, setTermsAccepted] = useState(false);
 
     const userTypes = [
         { type: "candidate", label: "Candidate", icon: <FaUserGraduate size={80} /> },
@@ -357,12 +358,30 @@ const UserTypeSelector = () => {
                         All fields are required
                     </div>
                 )}
-                <button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6">
-                    Submit
-                </button>
-            </div>
-        </form>
-    );
+                {/* Terms and conditions checkbox */}
+        <div className="mt-4 flex items-center">
+          <input
+            type="checkbox"
+            id="termsCheckbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="form-checkbox h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+          />
+          <label htmlFor="termsCheckbox" className="ml-2 text-sm text-gray-700">
+            I agree to the Terms and Conditions
+          </label>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6"
+          disabled={!termsAccepted} 
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  );
 };
 
 export default UserTypeSelector;
