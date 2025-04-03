@@ -12,7 +12,9 @@ const UserTypeSelector = () => {
   const [recruiterDetails, setRecruiterDetails] = useState({
     yearsOfExp: "",
     pastCompany: "",
-    education: "",
+    highestDegree: "",
+    universityName: "",
+    passedOutYear: ""
   });
   const [employeeDetails, setEmployeeDetails] = useState({
     companyName: "",
@@ -96,8 +98,14 @@ const UserTypeSelector = () => {
       if (!recruiterDetails.pastCompany.trim()) {
         newErrors.pastCompany = "Past company is required";
       }
-      if (!recruiterDetails.education.trim()) {
-        newErrors.education = "Education is required";
+      if (!recruiterDetails.highestDegree.trim()) {
+        newErrors.highestDegree = "Highest degree is required";
+      }
+      if (!recruiterDetails.universityName.trim()) {
+        newErrors.universityName = "University name is required";
+      }
+      if (!recruiterDetails.passedOutYear.trim()) {
+        newErrors.passedOutYear = "Passed out year is required";
       }
     } else if (selectedUserType === "employee") {
       if (!employeeDetails.companyName.trim()) {
@@ -281,6 +289,8 @@ const UserTypeSelector = () => {
                 value={recruiterDetails.yearsOfExp}
                 onChange={handleRecruiterChange}
                 placeholder="Years of Experience"
+                min="0"
+                max="30"
                 className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.yearsOfExp ? "border-2 border-red-500" : ""
                 }`}
@@ -299,7 +309,7 @@ const UserTypeSelector = () => {
                 name="pastCompany"
                 value={recruiterDetails.pastCompany}
                 onChange={handleRecruiterChange}
-                placeholder="Past Company"
+                placeholder="Past Company Name"
                 className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.pastCompany ? "border-2 border-red-500" : ""
                 }`}
@@ -313,21 +323,67 @@ const UserTypeSelector = () => {
               )}
             </div>
             <div className="relative mb-4">
+              <select
+                name="highestDegree"
+                value={recruiterDetails.highestDegree}
+                onChange={handleRecruiterChange}
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
+                  submitted && errors.highestDegree ? "border-2 border-red-500" : ""
+                }`}
+                required
+              >
+                <option value="">Select Highest Degree</option>
+                <option value="Bachelor's">Bachelor's</option>
+                <option value="Master's">Master's</option>
+                <option value="PhD">PhD</option>
+                <option value="Diploma">Diploma</option>
+                <option value="Associate">Associate</option>
+                <option value="High School">High School</option>
+              </select>
+              {submitted && errors.highestDegree && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <FaExclamationCircle className="mr-1" />
+                  <span>{errors.highestDegree}</span>
+                </div>
+              )}
+            </div>
+            <div className="relative mb-4">
               <input
                 type="text"
-                name="education"
-                value={recruiterDetails.education}
+                name="universityName"
+                value={recruiterDetails.universityName}
                 onChange={handleRecruiterChange}
-                placeholder="Education"
+                placeholder="University Name"
                 className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
-                  submitted && errors.education ? "border-2 border-red-500" : ""
+                  submitted && errors.universityName ? "border-2 border-red-500" : ""
                 }`}
                 required
               />
-              {submitted && errors.education && (
+              {submitted && errors.universityName && (
                 <div className="text-red-500 text-sm mt-1 flex items-center">
                   <FaExclamationCircle className="mr-1" />
-                  <span>{errors.education}</span>
+                  <span>{errors.universityName}</span>
+                </div>
+              )}
+            </div>
+            <div className="relative mb-4">
+              <input
+                type="number"
+                name="passedOutYear"
+                value={recruiterDetails.passedOutYear}
+                onChange={handleRecruiterChange}
+                placeholder="Passed Out Year"
+                min="1950"
+                max="2025"
+                className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
+                  submitted && errors.passedOutYear ? "border-2 border-red-500" : ""
+                }`}
+                required
+              />
+              {submitted && errors.passedOutYear && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <FaExclamationCircle className="mr-1" />
+                  <span>{errors.passedOutYear}</span>
                 </div>
               )}
             </div>
