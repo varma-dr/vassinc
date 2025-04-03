@@ -1,7 +1,6 @@
 const express = require('express');
-const connectDB = require('./db');
 const cors = require('cors');
-require('dotenv').config();
+const connectDB = require('./db');
 
 const app = express();
 
@@ -9,7 +8,7 @@ const app = express();
 connectDB();
 
 // Init Middleware
-app.use(express.json({ extended: false }));
+app.use(express.json());
 app.use(cors());
 
 // Define Routes
@@ -20,6 +19,6 @@ app.get('/', (req, res) => {
   res.send('API Running');
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5005;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

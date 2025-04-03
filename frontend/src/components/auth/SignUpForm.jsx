@@ -57,28 +57,52 @@ const SignUpForm = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        // Send data to backend API
-        const response = await axios.post('http://localhost:5000/api/users', {
+        // Log the data being sent
+        console.log("Sending data to API:", {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+        });
+
+        // Use the full URL with the correct port (5005)
+        const response = await axios.post('http://localhost:5005/api/users', {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
           password: formData.password
         });
 
+        console.log("API Response:", response.data);
+        
         // Store token in localStorage (for authentication)
         localStorage.setItem('token', response.data.token);
         
-        console.log("Form Submitted Successfully!", formData);
-        console.log("API Response:", response.data);
-        
-        navigate("/UserTypeSelector"); // Redirect to UserTypeSelector page
+        console.log("Registration successful, navigating to UserTypeSelector");
+        navigate("/UserTypeSelector");
       } catch (error) {
-        console.error("Registration error:", error.response?.data || error.message);
+        // Detailed error logging
+        console.error("Registration error:", error);
         
-        // Handle specific error responses from the server
-        if (error.response?.data?.msg === 'User already exists') {
-          setErrors({...errors, email: "This email is already registered."});
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.error("Error response data:", error.response.data);
+          console.error("Error response status:", error.response.status);
+          console.error("Error response headers:", error.response.headers);
+          
+          if (error.response.data.msg === 'User already exists') {
+            setErrors({...errors, email: "This email is already registered."});
+          } else {
+            alert(`Registration failed: ${error.response.data.msg || "Please try again later."}`);
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("Error request:", error.request);
+          alert("No response from server. Please check your connection and try again.");
         } else {
+          // Something happened in setting up the request that triggered an Error
+          console.error("Error message:", error.message);
           alert("Registration failed. Please try again later.");
         }
       } finally {
