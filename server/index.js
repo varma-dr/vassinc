@@ -5,7 +5,15 @@ import connectDB from './db.js';
 const app = express();
 
 // Connect to MongoDB
-connectDB();
+connectDB().then(() => {
+  console.log('\n🎉 🚀 MongoDB Connection Successful! 🚀 🎉');
+  console.log('✅ Database connection established');
+  console.log('✅ Ready to handle API requests');
+  console.log('✅ Your backend infrastructure is now ready\n');
+}).catch(err => {
+  console.error('❌ MongoDB connection error:', err.message);
+  process.exit(1);
+});
 
 // Middleware
 app.use(express.json());
@@ -16,9 +24,9 @@ app.get('/', (req, res) => {
 });
 
 // Define port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5005;
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🌐 Server running on port ${PORT}`);
 });
