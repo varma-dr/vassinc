@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/VassInc_logo.png";
 import axios from "axios";
@@ -13,6 +13,11 @@ const SignUpForm = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    countryCode: "+1", 
+    mobileNumber: "",
+    sameForWhatsApp: true, 
+    whatsAppCountryCode: "+1", 
+    whatsAppNumber: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -20,13 +25,47 @@ const SignUpForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Email Validation Regex
+  
+  const countryCodes = [
+    { code: "+1", country: "US/CA" },
+    { code: "+91", country: "IN" },
+  
+  ];
+
+  
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  
+  const phoneRegex = /^\d{7,15}$/;
 
   // Handle Input Change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    
+    if (type === "checkbox") {
+      // For the "Same for WhatsApp" checkbox
+      setFormData({ 
+        ...formData, 
+        [name]: checked,
+        // If checked, sync WhatsApp number with mobile number
+        ...(name === "sameForWhatsApp" && checked ? {
+          whatsAppCountryCode: formData.countryCode,
+          whatsAppNumber: formData.mobileNumber
+        } : {})
+      });
+    } else {
+      
+      setFormData({ ...formData, [name]: value });
+      
+      
+      if ((name === "countryCode" || name === "mobileNumber") && formData.sameForWhatsApp) {
+        const whatsAppField = name === "countryCode" ? "whatsAppCountryCode" : "whatsAppNumber";
+        setFormData(prev => ({
+          ...prev,
+          [name]: value,
+          [whatsAppField]: value
+        }));
+      }
+    }
   };
 
   // Validate Form
@@ -47,6 +86,16 @@ const SignUpForm = () => {
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match.";
     }
+    if (!formData.mobileNumber) {
+      newErrors.mobileNumber = "Mobile number is required.";
+    } else if (!phoneRegex.test(formData.mobileNumber)) {
+      newErrors.mobileNumber = "Please enter a valid mobile number.";
+    }
+    if (!formData.sameForWhatsApp && !formData.whatsAppNumber) {
+      newErrors.whatsAppNumber = "WhatsApp number is required.";
+    } else if (!formData.sameForWhatsApp && !phoneRegex.test(formData.whatsAppNumber)) {
+      newErrors.whatsAppNumber = "Please enter a valid WhatsApp number.";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -63,6 +112,7 @@ const SignUpForm = () => {
           lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
+
         });
 
         // Use the full URL with the correct port (5005)
@@ -70,7 +120,8 @@ const SignUpForm = () => {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
+          
         });
 
         console.log("API Response:", response.data);
@@ -180,6 +231,88 @@ const SignUpForm = () => {
             />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
+
+          {/* Mobile Number with Country Code */}
+          <div className="flex space-x-2 ">
+            <div className="relative w-1/3">
+              <FaPhone className="absolute left-3 top-3 text-gray-500" />
+              <div className="flex items-center gap-2"></div>
+              <select
+                name="countryCode"
+                value={formData.countryCode}
+                onChange={handleChange}
+                className="w-full pl-10 pr-2 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700"
+              >
+                {countryCodes.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.code} ({country.country})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="relative w-2/3">
+              <input
+                type="tel"
+                name="mobileNumber"
+                placeholder="Mobile Number"
+                value={formData.mobileNumber}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700"
+                style={{paddingLeft: '8px'}}
+              />
+            </div>
+          </div>
+          {errors.mobileNumber && <p className="text-red-500 text-sm mt-1">{errors.mobileNumber}</p>}
+          
+          {/* Same for WhatsApp Checkbox */}
+          <div className="flex items-center space-x-2 mt-2">
+            <input
+              type="checkbox"
+              name="sameForWhatsApp"
+              id="sameForWhatsApp"
+              checked={formData.sameForWhatsApp}
+              onChange={handleChange}
+              className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+            />
+            <label htmlFor="sameForWhatsApp" className="text-gray-700">
+              Same for WhatsApp
+            </label>
+          </div>
+          
+          {/* WhatsApp Number (conditionally displayed) */}
+          {!formData.sameForWhatsApp && (
+            <>
+              <div className="flex space-x-2 mt-2">
+                <div className="relative w-1/3">
+                  <FaPhone className="absolute left-3 top-3 text-gray-500" />
+                  <select
+                    name="whatsAppCountryCode"
+                    value={formData.whatsAppCountryCode}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-2 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700"
+                  >
+                    {countryCodes.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.code} ({country.country})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="relative w-2/3">
+                  <input
+                    type="tel"
+                    name="whatsAppNumber"
+                    placeholder="WhatsApp Number"
+                    value={formData.whatsAppNumber}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700"
+                    style={{paddingLeft: '12px'}}
+                  />
+                </div>
+              </div>
+              {errors.whatsAppNumber && <p className="text-red-500 text-sm mt-1">{errors.whatsAppNumber}</p>}
+            </>
+          )}
 
           {/* Password */}
           <div className="relative">
