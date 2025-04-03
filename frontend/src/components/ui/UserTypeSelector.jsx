@@ -76,7 +76,7 @@ const UserTypeSelector = () => {
 
     // Validate fields based on user type
     if (selectedUserType === "candidate") {
-      if (!candidateDetails.visaInfo.trim()) {
+      if (!candidateDetails.visaInfo) {
         newErrors.visaInfo = "Visa info is required";
       }
       if (!candidateDetails.specialization.trim()) {
@@ -176,17 +176,23 @@ const UserTypeSelector = () => {
         {selectedUserType === "candidate" && (
           <div className="mt-6">
             <div className="relative mb-4">
-              <input
-                type="text"
+              <select
                 name="visaInfo"
                 value={candidateDetails.visaInfo}
                 onChange={handleCandidateChange}
-                placeholder="Visa Info"
                 className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                   submitted && errors.visaInfo ? "border-2 border-red-500" : ""
                 }`}
                 required
-              />
+              >
+                <option value="">Select Visa Type</option>
+                <option value="F1-OPT">F1-OPT</option>
+                <option value="H1B">H1B</option>
+                <option value="H4-EAD">H4-EAD</option>
+                <option value="L2">L2</option>
+                <option value="GC">GC</option>
+                <option value="USC">USC</option>
+              </select>
               {submitted && errors.visaInfo && (
                 <div className="text-red-500 text-sm mt-1 flex items-center">
                   <FaExclamationCircle className="mr-1" />
