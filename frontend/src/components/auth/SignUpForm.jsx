@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/VassInc_logo.png";
+import axios from "axios";
 
 const SignUpForm = () => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const SignUpForm = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Email Validation Regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -37,7 +39,11 @@ const SignUpForm = () => {
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Please enter a valid email address.";
     }
-    if (!formData.password) newErrors.password = "Password is required.";
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match.";
     }
@@ -46,20 +52,69 @@ const SignUpForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
+  // Handle API registration and continue registration flow
+  const handleContinue = async () => {
     if (validateForm()) {
-      console.log("Form Submitted Successfully!", formData);
-      navigate("/UserTypeSelector"); // Redirect to UserTypeSelector page
+      setIsLoading(true);
+      try {
+        // Log the data being sent
+        console.log("Sending data to API:", {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+        });
+
+        // Use the full URL with the correct port (5005)
+        const response = await axios.post('http://localhost:5005/api/users', {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password
+        });
+
+        console.log("API Response:", response.data);
+        
+        // Store token in localStorage (for authentication)
+        localStorage.setItem('token', response.data.token);
+        
+        console.log("Registration successful, navigating to UserTypeSelector");
+        navigate("/UserTypeSelector");
+      } catch (error) {
+        // Detailed error logging
+        console.error("Registration error:", error);
+        
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.error("Error response data:", error.response.data);
+          console.error("Error response status:", error.response.status);
+          console.error("Error response headers:", error.response.headers);
+          
+          if (error.response.data.msg === 'User already exists') {
+            setErrors({...errors, email: "This email is already registered."});
+          } else {
+            alert(`Registration failed: ${error.response.data.msg || "Please try again later."}`);
+          }
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("Error request:", error.request);
+          alert("No response from server. Please check your connection and try again.");
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.error("Error message:", error.message);
+          alert("Registration failed. Please try again later.");
+        }
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   // Handle Form Submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log("Form Submitted Successfully!", formData);
-      alert("Registration Successful!");
-    }
+    handleContinue();
   };
 
   return (
@@ -168,14 +223,14 @@ const SignUpForm = () => {
             {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
           </div>
 
-          {/* Submit Button */}
           {/* Continue Registration Button */}
           <button
             type="button"
             onClick={handleContinue}
-            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6"
+            disabled={isLoading}
+            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6 disabled:opacity-50"
           >
-            Continue Registration
+            {isLoading ? "Processing..." : "Continue Registration"}
           </button>
 
           <div className="text-center mt-4 text-gray-600">

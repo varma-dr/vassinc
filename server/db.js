@@ -1,23 +1,23 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import path from 'path';
+const mongoose = require('mongoose');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load env vars
-dotenv.config();
+// Direct MongoDB connection string
+const mongoURI = 'mongodb+srv://vass123:vass123@vassinc.mu3zc.mongodb.net/?retryWrites=true&w=majority&appName=vassinc';
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('MongoDB connected');
-  } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
+    console.log('Attempting to connect to MongoDB...');
+    
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    console.log('MongoDB Connected Successfully!');
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message);
+    // Exit process with failure
     process.exit(1);
   }
 };
 
-export default connectDB;
+module.exports = connectDB;

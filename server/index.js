@@ -1,24 +1,24 @@
-import express from 'express';
-import connectDB from './db.js';
+const express = require('express');
+const cors = require('cors');
+const connectDB = require('./db');
 
-// Initialize Express
 const app = express();
 
-// Connect to MongoDB
+// Connect Database
 connectDB();
 
-// Middleware
+// Init Middleware
 app.use(express.json());
+app.use(cors());
 
-// Define routes
+// Define Routes
+app.use('/api/users', require('./routes/users'));
+
+// Basic route for testing
 app.get('/', (req, res) => {
-  res.send('API is running');
+  res.send('API Running');
 });
 
-// Define port
-const PORT = process.env.PORT || 5000;
+const PORT = 5005;
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
