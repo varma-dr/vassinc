@@ -19,6 +19,7 @@ const UserTypeSelector = () => {
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const cardSpacing = 16; // Spacing between cards
 
   const userTypes = [
     { type: "candidate", label: "Candidate", icon: <FaUserGraduate size={80} /> },
@@ -128,14 +129,20 @@ const UserTypeSelector = () => {
         <h1 className="text-2xl font-medium text-center mb-6 text-gray-600">Register As:</h1>
 
         {/* User Type Selection Cards */}
-        <div className="flex space-x-4 justify-center mt-6">
+        <div className="flex justify-center mt-6 transition-all duration-300">
           {userTypes.map(({ type, label, icon }) => (
             <label
               key={type}
               className={`cursor-pointer flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-300 shadow-md w-32 text-center transform
-                ${selectedUserType === type ? "border-teal-500 bg-teal-100 bg-opacity-90 scale-105" : "border-gray-300 bg-white bg-opacity-80 hover:bg-gray-100 hover:bg-opacity-80"}
+                ${selectedUserType === type ? "border-teal-500 bg-teal-100 bg-opacity-90 scale-105 z-10" : "border-gray-300 bg-white bg-opacity-80 hover:bg-gray-100 hover:bg-opacity-80"}
+                ${selectedUserType && selectedUserType !== type ? "opacity-75 blur-[0.5px]" : ""}
                 ${submitted && errors.userType && !selectedUserType ? "border-red-500" : ""}`}
               onClick={() => handleSelection(type)}
+              style={{
+                pointerEvents: selectedUserType ? (selectedUserType === type ? 'auto' : 'auto') : 'auto',
+                marginLeft: selectedUserType && selectedUserType !== type ? cardSpacing / 2 + 'px' : cardSpacing + 'px',
+                marginRight: selectedUserType && selectedUserType !== type ? cardSpacing / 2 + 'px' : cardSpacing + 'px',
+              }}
             >
               {/* Visible radio button */}
               <div className="flex justify-end w-full mb-2">
