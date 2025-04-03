@@ -1,5 +1,5 @@
-const express = require('express');
-const connectDB = require('./db');
+import express from 'express';
+import connectDB from './db.js';
 
 // Initialize Express
 const app = express();
@@ -10,12 +10,12 @@ connectDB();
 // Middleware
 app.use(express.json());
 
-//  routes
+// Define routes
 app.get('/', (req, res) => {
   res.send('API is running');
 });
 
-//  port
+// Define port
 const PORT = process.env.PORT || 5000;
 
 // Start server
