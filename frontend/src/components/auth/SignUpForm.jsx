@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/VassInc_logo.png";
+import axios from "axios";
 
 const SignUpForm = () => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const SignUpForm = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Email Validation Regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -37,7 +39,11 @@ const SignUpForm = () => {
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Please enter a valid email address.";
     }
-    if (!formData.password) newErrors.password = "Password is required.";
+    if (!formData.password) {
+      newErrors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match.";
     }
@@ -46,20 +52,45 @@ const SignUpForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
+  // Handle API registration and continue registration flow
+  const handleContinue = async () => {
     if (validateForm()) {
-      console.log("Form Submitted Successfully!", formData);
-      navigate("/UserTypeSelector"); // Redirect to UserTypeSelector page
+      setIsLoading(true);
+      try {
+        // Send data to backend API
+        const response = await axios.post('http://localhost:5000/api/users', {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password
+        });
+
+        // Store token in localStorage (for authentication)
+        localStorage.setItem('token', response.data.token);
+        
+        console.log("Form Submitted Successfully!", formData);
+        console.log("API Response:", response.data);
+        
+        navigate("/UserTypeSelector"); // Redirect to UserTypeSelector page
+      } catch (error) {
+        console.error("Registration error:", error.response?.data || error.message);
+        
+        // Handle specific error responses from the server
+        if (error.response?.data?.msg === 'User already exists') {
+          setErrors({...errors, email: "This email is already registered."});
+        } else {
+          alert("Registration failed. Please try again later.");
+        }
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   // Handle Form Submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log("Form Submitted Successfully!", formData);
-      alert("Registration Successful!");
-    }
+    handleContinue();
   };
 
   return (
@@ -168,14 +199,14 @@ const SignUpForm = () => {
             {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
           </div>
 
-          {/* Submit Button */}
           {/* Continue Registration Button */}
           <button
             type="button"
             onClick={handleContinue}
-            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6"
+            disabled={isLoading}
+            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6 disabled:opacity-50"
           >
-            Continue Registration
+            {isLoading ? "Processing..." : "Continue Registration"}
           </button>
 
           <div className="text-center mt-4 text-gray-600">

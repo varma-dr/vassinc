@@ -1,5 +1,5 @@
 import express from 'express';
-import connectDB from './db.js';
+import connectDB from './config/db.js';
 
 // Initialize Express
 const app = express();
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 });
 
 // Define port
-const PORT = process.env.PORT || 5005;
+const PORT = process.env.PORT || 5006;
 
 // Start server
 app.listen(PORT, () => {
