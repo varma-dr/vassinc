@@ -18,6 +18,25 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  countryCode: {
+    type: String,
+    default: '+1'
+  },
+  mobileNumber: {
+    type: String,
+    required: true
+  },
+  sameForWhatsApp: {
+    type: Boolean,
+    default: true
+  },
+  whatsAppCountryCode: {
+    type: String,
+    default: '+1'
+  },
+  whatsAppNumber: {
+    type: String
+  },
   userType: {
     type: String,
     default: 'standard'
