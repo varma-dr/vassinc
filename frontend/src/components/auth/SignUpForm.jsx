@@ -102,6 +102,11 @@ const SignUpForm = () => {
           lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
+          countryCode: formData.countryCode,
+          mobileNumber: formData.mobileNumber,
+          sameForWhatsApp: formData.sameForWhatsApp,
+          whatsAppCountryCode: formData.whatsAppCountryCode,
+          whatsAppNumber: formData.whatsAppNumber
         });
 
         const response = await axios.post("http://localhost:5005/api/users", {
@@ -109,6 +114,11 @@ const SignUpForm = () => {
           lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
+          countryCode: formData.countryCode,
+          mobileNumber: formData.mobileNumber,
+          sameForWhatsApp: formData.sameForWhatsApp,
+          whatsAppCountryCode: formData.whatsAppCountryCode,
+          whatsAppNumber: formData.whatsAppNumber
         });
 
         console.log("API Response:", response.data);
