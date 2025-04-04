@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { FaUserTie, FaUserGraduate, FaUsers, FaExclamationCircle } from "react-icons/fa";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 
 const UserTypeSelector = () => {
     const [selectedUserType, setSelectedUserType] = useState(null);
@@ -21,7 +19,7 @@ const UserTypeSelector = () => {
     const [employeeDetails, setEmployeeDetails] = useState({
         companyName: "",
         position: "",
-        startDate: null,
+        startDate: "",
     });
     const [errors, setErrors] = useState({});
     const [submitted, setSubmitted] = useState(false);
@@ -63,13 +61,14 @@ const UserTypeSelector = () => {
         }
     };
 
-    const handleEmployeeChange = (date) => {
+    const handleEmployeeChange = (e) => {
+        const { name, value } = e.target;
         setEmployeeDetails((prevState) => ({
             ...prevState,
-            startDate: date,
+            [name]: value,
         }));
-        if (errors.startDate) {
-            setErrors((prev) => ({ ...prev, startDate: null }));
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: null }));
         }
     };
 
@@ -116,9 +115,13 @@ const UserTypeSelector = () => {
             if (!employeeDetails.position.trim()) {
                 newErrors.position = "Position is required";
             }
-            if (!employeeDetails.startDate) {
+            if (!employeeDetails.startDate.trim()) {
                 newErrors.startDate = "Start date is required";
             }
+        }
+
+        if (!termsAccepted) {
+            newErrors.terms = "You must accept the Terms and Conditions";
         }
 
         setErrors(newErrors);
@@ -297,6 +300,7 @@ const UserTypeSelector = () => {
                                 className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                                     submitted && errors.companyName ? "border-2 border-red-500" : ""
                                 }`}
+                                required
                             />
                             {submitted && errors.companyName && (
                                 <div className="text-red-500 text-sm mt-1 flex items-center">
@@ -315,6 +319,7 @@ const UserTypeSelector = () => {
                                 className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                                     submitted && errors.position ? "border-2 border-red-500" : ""
                                 }`}
+                                required
                             />
                             {submitted && errors.position && (
                                 <div className="text-red-500 text-sm mt-1 flex items-center">
@@ -324,24 +329,14 @@ const UserTypeSelector = () => {
                             )}
                         </div>
                         <div className="relative mb-4">
-                            <DatePicker
-                                selected={employeeDetails.startDate}
+                            <input
+                                type="date"
+                                name="startDate"
+                                value={employeeDetails.startDate}
                                 onChange={handleEmployeeChange}
-                                placeholderText="Employment Start Date"
                                 className={`w-full px-4 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 ${
                                     submitted && errors.startDate ? "border-2 border-red-500" : ""
                                 }`}
-                                style={{
-                                    width: '100%',
-                                    height: '48px',
-                                    padding: '12px 16px',
-                                    fontSize: '16px',
-                                    boxSizing: 'border-box',
-                                }}
-                                dateFormat="MM/dd/yyyy"
-                                showYearDropdown
-                                scrollableYearDropdown
-                                yearDropdownItemNumber={15}
                                 required
                             />
                             {submitted && errors.startDate && (
@@ -359,29 +354,35 @@ const UserTypeSelector = () => {
                     </div>
                 )}
                 {/* Terms and conditions checkbox */}
-        <div className="mt-4 flex items-center">
-          <input
-            type="checkbox"
-            id="termsCheckbox"
-            checked={termsAccepted}
-            onChange={(e) => setTermsAccepted(e.target.checked)}
-            className="form-checkbox h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-          />
-          <label htmlFor="termsCheckbox" className="ml-2 text-sm text-gray-700">
-            I agree to the Terms and Conditions
-          </label>
-        </div>
+                <div className="mt-4 flex items-center">
+                    <input
+                        type="checkbox"
+                        id="termsCheckbox"
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        className="form-checkbox h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="termsCheckbox" className="ml-2 text-sm text-gray-700">
+                        I agree to the Terms and Conditions
+                    </label>
+                </div>
+                {submitted && errors.terms && (
+                    <div className="text-red-500 text-sm mt-1 flex items-center">
+                        <FaExclamationCircle className="mr-1" />
+                        <span>{errors.terms}</span>
+                    </div>
+                )}
 
-        <button
-          type="submit"
-          className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6"
-          disabled={!termsAccepted} 
-        >
-          Submit
-        </button>
-      </div>
-    </form>
-  );
+                <button
+                    type="submit"
+                    className={`w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6 ${!termsAccepted ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    disabled={!termsAccepted}
+                >
+                    Submit
+                </button>
+            </div>
+        </form>
+    );
 };
 
 export default UserTypeSelector;
