@@ -31,7 +31,7 @@ const SignUpForm = () => {
   ];
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const phoneRegex = /^\d{7,15}$/;
+  const phoneRegex = /^\d{10}$/; // Updated regex to require exactly 10 digits
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -47,15 +47,26 @@ const SignUpForm = () => {
             }
           : {}),
       });
+    } else if (name === "mobileNumber" || name === "whatsAppNumber") {
+      // Only allow numeric input and limit to 10 digits
+      const numericValue = value.replace(/\D/g, '').slice(0, 10);
+      setFormData({ ...formData, [name]: numericValue });
+
+      if (name === "mobileNumber" && formData.sameForWhatsApp) {
+        setFormData(prev => ({
+          ...prev,
+          mobileNumber: numericValue,
+          whatsAppNumber: numericValue
+        }));
+      }
     } else {
       setFormData({ ...formData, [name]: value });
 
-      if ((name === "countryCode" || name === "mobileNumber") && formData.sameForWhatsApp) {
-        const whatsAppField = name === "countryCode" ? "whatsAppCountryCode" : "whatsAppNumber";
-        setFormData((prev) => ({
+      if (name === "countryCode" && formData.sameForWhatsApp) {
+        setFormData(prev => ({
           ...prev,
-          [name]: value,
-          [whatsAppField]: value,
+          countryCode: value,
+          whatsAppCountryCode: value,
         }));
       }
     }
@@ -80,13 +91,17 @@ const SignUpForm = () => {
     }
     if (!formData.mobileNumber) {
       newErrors.mobileNumber = "Mobile number is required.";
+    } else if (formData.mobileNumber.length !== 10) {
+      newErrors.mobileNumber = "Please enter a valid 10-digit mobile number.";
     } else if (!phoneRegex.test(formData.mobileNumber)) {
-      newErrors.mobileNumber = "Please enter a valid mobile number.";
+      newErrors.mobileNumber = "Please enter a valid 10-digit mobile number.";
     }
     if (!formData.sameForWhatsApp && !formData.whatsAppNumber) {
       newErrors.whatsAppNumber = "WhatsApp number is required.";
+    } else if (!formData.sameForWhatsApp && formData.whatsAppNumber.length !== 10) {
+      newErrors.whatsAppNumber = "Please enter a valid 10-digit WhatsApp number.";
     } else if (!formData.sameForWhatsApp && !phoneRegex.test(formData.whatsAppNumber)) {
-      newErrors.whatsAppNumber = "Please enter a valid WhatsApp number.";
+      newErrors.whatsAppNumber = "Please enter a valid 10-digit WhatsApp number.";
     }
 
     setErrors(newErrors);
@@ -230,9 +245,10 @@ const SignUpForm = () => {
             <input
               type="tel"
               name="mobileNumber"
-              placeholder="Mobile Number"
+              placeholder="Mobile Number (10 digits)"
               value={formData.mobileNumber}
               onChange={handleChange}
+              maxLength={10}
               className="w-2/3 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 text-center"
             />
           </div>
@@ -269,9 +285,10 @@ const SignUpForm = () => {
               <input
                 type="tel"
                 name="whatsAppNumber"
-                placeholder="WhatsApp Number"
+                placeholder="WhatsApp Number (10 digits)"
                 value={formData.whatsAppNumber}
                 onChange={handleChange}
+                maxLength={10}
                 className="w-2/3 py-2.5 rounded-md border border-gray-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700 text-center"
               />
             </div>
