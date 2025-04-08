@@ -16,6 +16,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
 
   // Email validation regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -24,12 +25,12 @@ const LoginPage = () => {
   useEffect(() => {
     document.title = "VASS INC - Login";
     
-    // Check if user is already logged in
-    const token = localStorage.getItem('token');
+    // Check if user is already logged in but don't automatically redirect
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
-      navigate('/dashboard'); // Redirect to dashboard if already logged in
+      setIsAlreadyLoggedIn(true);
     }
-  }, [navigate]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -78,6 +79,19 @@ const LoginPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleContinueToDashboard = () => {
+    navigate('/dashboard');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('userType');
+    localStorage.removeItem('userType');
+    setIsAlreadyLoggedIn(false);
+    setLoginError("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -102,6 +116,7 @@ const LoginPage = () => {
         
         // If successful login
         console.log('Login successful', response.data);
+        setIsAlreadyLoggedIn(true);
         
         // Check user type and redirect accordingly
         if (response.data.userType === 'standard') {
@@ -158,125 +173,151 @@ const LoginPage = () => {
         
         <h2 className="text-xl font-medium text-center mb-6 text-gray-600 text-2xl">Login</h2>
         
-        {/* Error message */}
-        {loginError && (
-          <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded flex items-center justify-center">
-            <span>{loginError}</span>
-          </div>
-        )}
-        
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email Field */}
-          <div className="relative">
-            <FaUser className="absolute left-3 top-3 text-gray-500" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full pl-10 pr-4 py-2.5 rounded-md border ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
-              required
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
-          </div>
-          
-          {/* Password Field */}
-          <div className="relative">
-            <FaLock className="absolute left-3 top-3 text-gray-500" />
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`w-full pl-10 pr-10 py-2.5 rounded-md border ${
-                errors.password ? "border-red-500" : "border-gray-300"
-              } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
-              required
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-3 text-gray-500 hover:text-teal-500"
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex="-1"
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-          </div>
-          
-          {/* User Type Dropdown */}
-          <div className="relative">
-            <select
-              name="userType"
-              value={formData.userType}
-              onChange={handleChange}
-              className={`w-full pl-4 pr-4 py-2.5 rounded-md border ${
-                errors.userType ? "border-red-500" : "border-gray-300"
-              } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
-            >
-              <option value="">Select User Type</option>
-              <option value="candidate">Candidate</option>
-              <option value="recruiter">Recruiter</option>
-              <option value="employee">Employee</option>
-              <option value="admin">Admin</option>
-            </select>
-            {errors.userType && (
-              <p className="text-red-500 text-sm mt-1">{errors.userType}</p>
-            )}
-          </div>
-          
-          {/* Remember Me Checkbox */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                name="rememberMe"
-                checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
-                className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-              />
-              <label htmlFor="rememberMe" className="ml-2 text-gray-600">
-                Remember me
-              </label>
+        {/* Already logged in message */}
+        {isAlreadyLoggedIn ? (
+          <div className="mb-8">
+            <div className="p-4 bg-teal-50 border border-teal-400 text-teal-800 rounded text-center mb-4">
+              <p className="font-medium">You are already logged in!</p>
+              <p className="text-sm mt-1">Would you like to continue to your dashboard or log out?</p>
             </div>
+            <div className="flex gap-4">
+              <button
+                onClick={handleContinueToDashboard}
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md"
+              >
+                Go to Dashboard
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2.5 rounded-md shadow-md"
+              >
+                Log Out
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Error message */}
+            {loginError && (
+              <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded flex items-center justify-center">
+                <span>{loginError}</span>
+              </div>
+            )}
             
-            {/* Forgot Password */}
-            <div className="text-sm">
-              <a href="/forgot-password" className="text-teal-600 hover:underline">
-                Forgot Password?
-              </a>
-            </div>
-          </div>
-          
-          {/* Login Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 ${
-              loading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-          
-          {/* Sign Up Link */}
-          <div className="text-center mt-6 text-gray-600">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-teal-600 hover:underline font-medium">
-              Sign Up
-            </Link>
-          </div>
-        </form>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email Field */}
+              <div className="relative">
+                <FaUser className="absolute left-3 top-3 text-gray-500" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email Address"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-md border ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
+                  required
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                )}
+              </div>
+              
+              {/* Password Field */}
+              <div className="relative">
+                <FaLock className="absolute left-3 top-3 text-gray-500" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-10 py-2.5 rounded-md border ${
+                    errors.password ? "border-red-500" : "border-gray-300"
+                  } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-3 text-gray-500 hover:text-teal-500"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex="-1"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                )}
+              </div>
+              
+              {/* User Type Dropdown */}
+              <div className="relative">
+                <select
+                  name="userType"
+                  value={formData.userType}
+                  onChange={handleChange}
+                  className={`w-full pl-4 pr-4 py-2.5 rounded-md border ${
+                    errors.userType ? "border-red-500" : "border-gray-300"
+                  } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
+                >
+                  <option value="">Select User Type</option>
+                  <option value="candidate">Candidate</option>
+                  <option value="recruiter">Recruiter</option>
+                  <option value="employee">Employee</option>
+                  <option value="admin">Admin</option>
+                </select>
+                {errors.userType && (
+                  <p className="text-red-500 text-sm mt-1">{errors.userType}</p>
+                )}
+              </div>
+              
+              {/* Remember Me Checkbox */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="rememberMe"
+                    name="rememberMe"
+                    checked={rememberMe}
+                    onChange={() => setRememberMe(!rememberMe)}
+                    className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                  />
+                  <label htmlFor="rememberMe" className="ml-2 text-gray-600">
+                    Remember me
+                  </label>
+                </div>
+                
+                {/* Forgot Password */}
+                <div className="text-sm">
+                  <a href="/forgot-password" className="text-teal-600 hover:underline">
+                    Forgot Password?
+                  </a>
+                </div>
+              </div>
+              
+              {/* Login Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 ${
+                  loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                {loading ? "Logging in..." : "Login"}
+              </button>
+              
+              {/* Sign Up Link */}
+              <div className="text-center mt-6 text-gray-600">
+                Don't have an account?{" "}
+                <Link to="/signup" className="text-teal-600 hover:underline font-medium">
+                  Sign Up
+                </Link>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );
