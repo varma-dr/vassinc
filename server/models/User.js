@@ -39,7 +39,38 @@ const UserSchema = new mongoose.Schema({
   },
   userType: {
     type: String,
+    enum: ['standard', 'candidate', 'recruiter', 'employee'],
     default: 'standard'
+  },
+  // Candidate-specific fields
+  visaInfo: {
+    type: String
+  },
+  highestDegree: {
+    type: String
+  },
+  universityName: {
+    type: String
+  },
+  passedOutYear: {
+    type: String
+  },
+  // Recruiter-specific fields
+  yearsOfExp: {
+    type: Number
+  },
+  pastCompany: {
+    type: String
+  },
+  // Employee-specific fields
+  companyName: {
+    type: String
+  },
+  position: {
+    type: String
+  },
+  startDate: {
+    type: Date
   },
   date: {
     type: Date,
