@@ -6,10 +6,10 @@ const jwt = require('jsonwebtoken');
 exports.registerUser = async (req, res) => {
   try {
     console.log('Registration attempt with:', req.body);
-    const { 
-      firstName, 
-      lastName, 
-      email, 
+    const {
+      firstName,
+      lastName,
+      email,
       password,
       countryCode,
       mobileNumber,
@@ -97,6 +97,92 @@ exports.registerUser = async (req, res) => {
     );
   } catch (err) {
     console.error('Registration error:', err.message);
+    console.error('Full error:', err);
+    res.status(500).json({ msg: 'Server error', error: err.message });
+  }
+};
+
+// Update user type and related information
+exports.updateUserType = async (req, res) => {
+  try {
+    console.log('Update user type request with:', req.body);
+    
+    // Get user data from decoded token
+    const userId = req.user.id;
+    
+    const {
+      userType,
+      // Candidate fields
+      visaInfo,
+      highestDegree,
+      universityName,
+      passedOutYear,
+      // Recruiter fields
+      yearsOfExp,
+      pastCompany,
+      // Employee fields
+      companyName,
+      position,
+      startDate
+    } = req.body;
+
+    // Validate user type
+    if (!userType || !['candidate', 'recruiter', 'employee'].includes(userType)) {
+      return res.status(400).json({ msg: 'Invalid user type' });
+    }
+
+    // Find user by ID
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Update user type
+    user.userType = userType;
+
+    // Update specific fields based on user type
+    if (userType === 'candidate') {
+      if (!visaInfo || !highestDegree || !universityName || !passedOutYear) {
+        return res.status(400).json({ msg: 'Missing required candidate fields' });
+      }
+      
+      user.visaInfo = visaInfo;
+      user.highestDegree = highestDegree;
+      user.universityName = universityName;
+      user.passedOutYear = passedOutYear;
+    } 
+    else if (userType === 'recruiter') {
+      if (!yearsOfExp || !pastCompany || !highestDegree || !universityName || !passedOutYear) {
+        return res.status(400).json({ msg: 'Missing required recruiter fields' });
+      }
+      
+      user.yearsOfExp = yearsOfExp;
+      user.pastCompany = pastCompany;
+      user.highestDegree = highestDegree;
+      user.universityName = universityName;
+      user.passedOutYear = passedOutYear;
+    } 
+    else if (userType === 'employee') {
+      if (!companyName || !position || !startDate) {
+        return res.status(400).json({ msg: 'Missing required employee fields' });
+      }
+      
+      user.companyName = companyName;
+      user.position = position;
+      user.startDate = startDate;
+    }
+
+    // Save updated user
+    await user.save();
+    console.log('User type updated successfully');
+
+    res.status(200).json({ 
+      msg: 'User type updated successfully',
+      userType: user.userType
+    });
+    
+  } catch (err) {
+    console.error('Error updating user type:', err.message);
     console.error('Full error:', err);
     res.status(500).json({ msg: 'Server error', error: err.message });
   }
