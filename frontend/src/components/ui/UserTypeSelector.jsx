@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaUserTie, FaUserGraduate, FaUsers, FaExclamationCircle } from "react-icons/fa";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const UserTypeSelector = () => {
+    const navigate = useNavigate();
     const [selectedUserType, setSelectedUserType] = useState(null);
     const [candidateDetails, setCandidateDetails] = useState({
         visaInfo: "",
@@ -25,6 +28,19 @@ const UserTypeSelector = () => {
     const [submitted, setSubmitted] = useState(false);
     const cardSpacing = 16;
     const [termsAccepted, setTermsAccepted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [token, setToken] = useState("");
+
+    // Get token from localStorage on component mount
+    useEffect(() => {
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken) {
+            // Redirect to login if no token is found
+            navigate("/login");
+            return;
+        }
+        setToken(storedToken);
+    }, [navigate]);
 
     const userTypes = [
         { type: "candidate", label: "Candidate", icon: <FaUserGraduate size={80} /> },
@@ -128,13 +144,78 @@ const UserTypeSelector = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitted(true);
 
         if (validateForm()) {
-            console.log("Form submitted successfully");
-            alert("Form submitted successfully!");
+            setIsLoading(true);
+            try {
+                // Prepare data based on selected user type
+                let userData = { userType: selectedUserType };
+                
+                if (selectedUserType === "candidate") {
+                    userData = {
+                        ...userData,
+                        ...candidateDetails
+                    };
+                } else if (selectedUserType === "recruiter") {
+                    userData = {
+                        ...userData,
+                        ...recruiterDetails
+                    };
+                } else if (selectedUserType === "employee") {
+                    userData = {
+                        ...userData,
+                        ...employeeDetails
+                    };
+                }
+
+                console.log("Submitting user type data:", userData);
+                
+                // Send data to backend
+                const response = await axios.post(
+                    "http://localhost:5005/api/users/update-type",
+                    userData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                console.log("API Response:", response.data);
+                
+                // On successful submission, navigate to the next page
+                // You can change this to whatever page should come after user type selection
+                navigate("/dashboard");
+                
+            } catch (error) {
+                console.error("Error updating user type:", error);
+                
+                if (error.response) {
+                    console.error("Error response data:", error.response.data);
+                    console.error("Error response status:", error.response.status);
+                    
+                    // Handle unauthorized access
+                    if (error.response.status === 401) {
+                        alert("Your session has expired. Please log in again.");
+                        localStorage.removeItem("token");
+                        navigate("/login");
+                    } else {
+                        alert(`Failed to update profile: ${error.response.data.msg || "Please try again later."}`);
+                    }
+                } else if (error.request) {
+                    console.error("Error request:", error.request);
+                    alert("No response from server. Please check your connection and try again.");
+                } else {
+                    console.error("Error message:", error.message);
+                    alert("Failed to update profile. Please try again later.");
+                }
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -375,10 +456,10 @@ const UserTypeSelector = () => {
 
                 <button
                     type="submit"
-                    className={`w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6 ${!termsAccepted ? 'opacity-60 cursor-not-allowed' : ''}`}
-                    disabled={!termsAccepted}
+                    className={`w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 rounded-md shadow-md-elegant-button focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 mt-6 ${!termsAccepted || isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    disabled={!termsAccepted || isLoading}
                 >
-                    Submit
+                    {isLoading ? "Processing..." : "Submit"}
                 </button>
             </div>
         </form>
