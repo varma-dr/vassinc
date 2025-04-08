@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Logo from "../../assets/VassInc_logo.png";
-import {
-  LineChart,
+import {LineChart,
   Line,
   XAxis,
   YAxis,
@@ -126,9 +125,19 @@ const CandidateDashboard = () => {
     profilePhoto: null
   });
 
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
+
   const [backupProfile, setBackupProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  
   const handleEditProfile = () => {
     setBackupProfile({ ...profile });
     setIsEditing(true);
@@ -144,21 +153,37 @@ const CandidateDashboard = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (name === 'whatsappSame') {
+    
+    // Handle mobile number and WhatsApp number with 10-digit limit
+    if (name === 'mobileNumber' || name === 'whatsappNumber') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 10);
+      
+      if (name === 'mobileNumber' && profile.whatsappSame) {
+        setProfile((prev) => ({
+          ...prev,
+          mobileNumber: numericValue,
+          whatsappNumber: numericValue
+        }));
+      } else {
+        setProfile((prev) => ({ ...prev, [name]: numericValue }));
+      }
+    } else if (name === 'whatsappSame') {
       setProfile((prev) => ({
         ...prev,
         whatsappSame: checked,
         whatsappNumber: checked ? prev.mobileNumber : prev.whatsappNumber
       }));
-    } else if (name === 'mobileNumber' && profile.whatsappSame) {
-      setProfile((prev) => ({
-        ...prev,
-        mobileNumber: value,
-        whatsappNumber: value
-      }));
     } else {
       setProfile((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     }
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleFileChange = (e) => {
@@ -192,6 +217,18 @@ const CandidateDashboard = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validatePasswordForm = () => {
+    const newErrors = {};
+    if (!passwordData.oldPassword) newErrors.oldPassword = 'Old password is required';
+    if (!passwordData.newPassword) newErrors.newPassword = 'New password is required';
+    if (!passwordData.confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    setPasswordErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmitProfile = () => {
     if (validateForm()) {
       setIsEditing(false);
@@ -200,19 +237,100 @@ const CandidateDashboard = () => {
     }
   };
 
+  const handleSubmitPassword = () => {
+    if (validatePasswordForm()) {
+      console.log('Password change submitted:', passwordData);
+      setChangingPassword(false);
+      setPasswordData({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setPasswordErrors({});
+    }
+  };
+
   const renderError = (field) =>
     errors[field] && <p className="text-red-500 text-sm mt-1">{errors[field]}</p>;
+
+  const renderPasswordError = (field) =>
+    passwordErrors[field] && <p className="text-red-500 text-sm mt-1">{passwordErrors[field]}</p>;
+
+  const renderPasswordChangeSection = () => (
+    <div className="mt-6 p-4 border rounded-md bg-gray-50">
+      <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-gray-700 font-semibold mb-1">Old Password *</label>
+          <input
+            type="password"
+            name="oldPassword"
+            value={passwordData.oldPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded p-2"
+          />
+          {renderPasswordError('oldPassword')}
+        </div>
+        <div>
+          <label className="block text-gray-700 font-semibold mb-1">New Password *</label>
+          <input
+            type="password"
+            name="newPassword"
+            value={passwordData.newPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded p-2"
+          />
+          {renderPasswordError('newPassword')}
+          <PasswordStrengthIndicator password={passwordData.newPassword} />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-semibold mb-1">Confirm Password *</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={passwordData.confirmPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded p-2"
+          />
+          {renderPasswordError('confirmPassword')}
+        </div>
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={() => setChangingPassword(false)}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmitPassword}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          >
+            Update Password
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderProfileSection = () => (
     <div className="bg-white rounded-lg shadow p-6 border">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-blue-700">Candidate Profile</h2>
         {!isEditing ? (
-          <button
-            onClick={handleEditProfile}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-          >
-            Edit Profile
-          </button>
+          <div className="space-x-2">
+            <button
+              onClick={() => setChangingPassword(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+            >
+              Change Password
+            </button>
+            <button
+              onClick={handleEditProfile}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            >
+              Edit Profile
+            </button>
+          </div>
         ) : (
           <div className="space-x-2">
             <button
@@ -230,6 +348,9 @@ const CandidateDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Password Change Section */}
+      {changingPassword && renderPasswordChangeSection()}
 
       {/* Profile Photo */}
       <div className="mb-6">
@@ -317,7 +438,7 @@ const CandidateDashboard = () => {
         </div>
 
         <div>
-          <label className="block text-gray-700 font-semibold mb-1">Mobile Number *</label>
+          <label className="block text-gray-700 font-semibold mb-1">Mobile Number * (10 digits)</label>
           {isEditing ? (
             <>
               <input
@@ -326,6 +447,8 @@ const CandidateDashboard = () => {
                 value={profile.mobileNumber}
                 onChange={handleChange}
                 className="w-full border rounded p-2"
+                maxLength="10"
+                placeholder="Enter 10-digit mobile number"
               />
               {renderError('mobileNumber')}
             </>
@@ -335,7 +458,7 @@ const CandidateDashboard = () => {
         </div>
 
         <div>
-          <label className="block text-gray-700 font-semibold mb-1">WhatsApp Number *</label>
+          <label className="block text-gray-700 font-semibold mb-1">WhatsApp Number * (10 digits)</label>
           {isEditing ? (
             <>
               <div className="flex items-center mb-2 gap-2">
@@ -353,7 +476,9 @@ const CandidateDashboard = () => {
                 value={profile.whatsappNumber}
                 onChange={handleChange}
                 className="w-full border rounded p-2"
+                maxLength="10"
                 disabled={profile.whatsappSame}
+                placeholder="Enter 10-digit WhatsApp number"
               />
               {renderError('whatsappNumber')}
             </>
@@ -382,7 +507,15 @@ const CandidateDashboard = () => {
               {renderError('workAuthorization')}
             </>
           ) : (
-            <p className="text-gray-800">{profile.workAuthorization || 'Not provided'}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-800">{profile.workAuthorization || 'Not provided'}</p>
+              <button 
+                onClick={() => setIsEditing(true)}
+                className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded"
+              >
+                Change
+              </button>
+            </div>
           )}
         </div>
 
@@ -447,7 +580,20 @@ const CandidateDashboard = () => {
       </div>
     </div>
   );
-  const [submissions, setSubmissions] = useState([]);
+  
+  // Mock submissions data based on the screenshot
+  const [submissions, setSubmissions] = useState([
+    {
+      date: '2025-04-07',
+      company: 'ABC Inc',
+      position: 'Developer',
+      location: 'NY',
+      status: 'submitted',
+      vendor: 'Vendor X',
+      rate: '$50/hr'
+    }
+  ]);
+  
   const [submissionFilter, setSubmissionFilter] = useState('all');
   const [submissionSort, setSubmissionSort] = useState('date');
   const [selectedTimeframe, setSelectedTimeframe] = useState('weekly');
@@ -480,6 +626,23 @@ const CandidateDashboard = () => {
       monthlySubmissions: monthlyData
     });
   }, []);
+
+  const renderStatusIcon = (status) => {
+    switch (status) {
+      case 'submitted':
+        return <span title="Submitted">⏳</span>;
+      case 'interview':
+        return <span title="Interview Scheduled">📅</span>;
+      case 'pending':
+        return <span title="Feedback Pending">🔍</span>;
+      case 'selected':
+        return <span title="Selected">✅</span>;
+      case 'rejected':
+        return <span title="Rejected">❌</span>;
+      default:
+        return null;
+    }
+  };
 
   const renderDashboard = () => (
     <div className="bg-white rounded-lg shadow p-6 border">
@@ -541,6 +704,42 @@ const CandidateDashboard = () => {
   const renderSubmissions = () => (
     <div className="bg-white rounded-lg shadow p-6 border">
       <h2 className="text-2xl font-bold text-blue-700 mb-4">Submission History</h2>
+      
+      <div className="flex flex-wrap justify-between mb-4">
+        <div className="mb-2">
+          <label className="mr-2 text-gray-700">Filter by Status:</label>
+          <select 
+            value={submissionFilter} 
+            onChange={(e) => setSubmissionFilter(e.target.value)}
+            className="border rounded p-2"
+          >
+            <option value="all">All Status</option>
+            <option value="submitted">Submitted</option>
+            <option value="interview">Interview Scheduled</option>
+            <option value="pending">Feedback Pending</option>
+            <option value="selected">Selected</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        
+        <div>
+          <label className="mr-2 text-gray-700">Sort by:</label>
+          <select 
+            value={submissionSort} 
+            onChange={(e) => setSubmissionSort(e.target.value)}
+            className="border rounded p-2"
+          >
+            <option value="date">Submission Date</option>
+            <option value="company">Company</option>
+            <option value="position">Position</option>
+          </select>
+        </div>
+      </div>
+      
+      <div className="mb-2 text-right text-gray-700">
+        {submissions.length} submissions found
+      </div>
+      
       {submissions.length === 0 ? (
         <p className="text-center text-gray-500 text-lg py-12">No submissions yet</p>
       ) : (
@@ -548,11 +747,14 @@ const CandidateDashboard = () => {
           <table className="min-w-full border text-sm text-left">
             <thead className="bg-gray-100 text-gray-700">
               <tr>
-                <th className="p-2 border">Date</th>
-                <th className="p-2 border">Company</th>
-                <th className="p-2 border">Position</th>
-                <th className="p-2 border">Location</th>
-                <th className="p-2 border">Status</th>
+                <th className="p-2 border">DATE</th>
+                <th className="p-2 border">COMPANY</th>
+                <th className="p-2 border">POSITION</th>
+                <th className="p-2 border">LOCATION</th>
+                <th className="p-2 border">STATUS</th>
+                <th className="p-2 border">VENDOR</th>
+                <th className="p-2 border">RATE</th>
+                <th className="p-2 border">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
@@ -562,7 +764,19 @@ const CandidateDashboard = () => {
                   <td className="p-2 border">{sub.company}</td>
                   <td className="p-2 border">{sub.position}</td>
                   <td className="p-2 border">{sub.location}</td>
-                  <td className="p-2 border">{sub.status}</td>
+                  <td className="p-2 border">
+                    <span className="flex items-center">
+                      {renderStatusIcon(sub.status)} 
+                      <span className="ml-1">{sub.status}</span>
+                    </span>
+                  </td>
+                  <td className="p-2 border">{sub.vendor}</td>
+                  <td className="p-2 border">{sub.rate}</td>
+                  <td className="p-2 border">
+                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -571,6 +785,7 @@ const CandidateDashboard = () => {
       )}
     </div>
   );
+  
   const [recruiter, setRecruiter] = useState(null); // Optional for recruiter panel
 
   return (
@@ -612,16 +827,6 @@ const CandidateDashboard = () => {
               Submissions
             </li>
             <li
-              onClick={() => setActivePanel('candidate')}
-              className={`cursor-pointer px-4 py-2 rounded transition ${
-                activePanel === 'candidate'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-blue-100 text-gray-700'
-              }`}
-            >
-              Candidate Profile
-            </li>
-            <li
               onClick={() => setActivePanel('recruiter')}
               className={`cursor-pointer px-4 py-2 rounded transition ${
                 activePanel === 'recruiter'
@@ -630,6 +835,16 @@ const CandidateDashboard = () => {
               }`}
             >
               Recruiter Info
+            </li>
+            <li
+              onClick={() => setActivePanel('candidate')}
+              className={`cursor-pointer px-4 py-2 rounded transition ${
+                activePanel === 'candidate'
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-blue-100 text-gray-700'
+              }`}
+            >
+              Candidate Profile
             </li>
           </ul>
         </aside>
@@ -660,4 +875,3 @@ const CandidateDashboard = () => {
 };
 
 export default CandidateDashboard;
-
