@@ -1,6 +1,6 @@
 const express = require('express');
+const connectDB = require('./config/db');
 const cors = require('cors');
-const connectDB = require('./db');
 require('dotenv').config();
 
 const app = express();
@@ -12,27 +12,15 @@ connectDB();
 app.use(express.json({ extended: false }));
 app.use(cors());
 
-// Define Routes
+// Routes
 app.use('/api/users', require('./routes/users'));
+app.use('/api/auth', require('./routes/auth')); 
 
-// Basic route for testing
-app.get('/', (req, res) => {
-  res.send('API Running');
-});
-
-// Handle errors
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
+app.get('/', (req, res) => res.send('API Running'));
 
 const PORT = process.env.PORT || 5005;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  app.close(() => {
-    console.log('Process terminated');
-  });
+app.listen(PORT, () => {
+  console.log(`✨ Server started on port ${PORT}`);
+  console.log(`🌐 API available at http://localhost:${PORT}`);
 });
