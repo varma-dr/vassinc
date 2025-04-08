@@ -187,9 +187,8 @@ const UserTypeSelector = () => {
 
                 console.log("API Response:", response.data);
                 
-                // On successful submission, navigate to the next page
-                // You can change this to whatever page should come after user type selection
-                navigate("/dashboard");
+              
+                navigate("/login");
                 
             } catch (error) {
                 console.error("Error updating user type:", error);
