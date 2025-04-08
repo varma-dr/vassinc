@@ -2,25 +2,137 @@ import React, { useState, useEffect } from 'react';
 import Logo from "../../assets/VassInc_logo.png";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+// Array of US states for dropdowns (for both location fields and for location ID proof)
+const usStates = [
+  { value: '', label: 'Select a state' },
+  { value: 'AL', label: 'Alabama' },
+  { value: 'AK', label: 'Alaska' },
+  { value: 'AZ', label: 'Arizona' },
+  { value: 'AR', label: 'Arkansas' },
+  { value: 'CA', label: 'California' },
+  { value: 'CO', label: 'Colorado' },
+  { value: 'CT', label: 'Connecticut' },
+  { value: 'DE', label: 'Delaware' },
+  { value: 'FL', label: 'Florida' },
+  { value: 'GA', label: 'Georgia' },
+  { value: 'HI', label: 'Hawaii' },
+  { value: 'ID', label: 'Idaho' },
+  { value: 'IL', label: 'Illinois' },
+  { value: 'IN', label: 'Indiana' },
+  { value: 'IA', label: 'Iowa' },
+  { value: 'KS', label: 'Kansas' },
+  { value: 'KY', label: 'Kentucky' },
+  { value: 'LA', label: 'Louisiana' },
+  { value: 'ME', label: 'Maine' },
+  { value: 'MD', label: 'Maryland' },
+  { value: 'MA', label: 'Massachusetts' },
+  { value: 'MI', label: 'Michigan' },
+  { value: 'MN', label: 'Minnesota' },
+  { value: 'MS', label: 'Mississippi' },
+  { value: 'MO', label: 'Missouri' },
+  { value: 'MT', label: 'Montana' },
+  { value: 'NE', label: 'Nebraska' },
+  { value: 'NV', label: 'Nevada' },
+  { value: 'NH', label: 'New Hampshire' },
+  { value: 'NJ', label: 'New Jersey' },
+  { value: 'NM', label: 'New Mexico' },
+  { value: 'NY', label: 'New York' },
+  { value: 'NC', label: 'North Carolina' },
+  { value: 'ND', label: 'North Dakota' },
+  { value: 'OH', label: 'Ohio' },
+  { value: 'OK', label: 'Oklahoma' },
+  { value: 'OR', label: 'Oregon' },
+  { value: 'PA', label: 'Pennsylvania' },
+  { value: 'RI', label: 'Rhode Island' },
+  { value: 'SC', label: 'South Carolina' },
+  { value: 'SD', label: 'South Dakota' },
+  { value: 'TN', label: 'Tennessee' },
+  { value: 'TX', label: 'Texas' },
+  { value: 'UT', label: 'Utah' },
+  { value: 'VT', label: 'Vermont' },
+  { value: 'VA', label: 'Virginia' },
+  { value: 'WA', label: 'Washington' },
+  { value: 'WV', label: 'West Virginia' },
+  { value: 'WI', label: 'Wisconsin' },
+  { value: 'WY', label: 'Wyoming' }
+];
+
+// A simple PasswordStrengthIndicator component (unchanged)
+const PasswordStrengthIndicator = ({ password }) => {
+  const hasUppercase = /[A-Z]/.test(password);
+  const strength = password.length === 0 ? '' : hasUppercase ? 'Strong' : 'Weak';
+  return (
+    <p className="text-sm mt-1">
+      {password.length > 0 && `Password Strength: ${strength}`}
+    </p>
+  );
+};
+
+// Header component for the top–right profile symbol with logout option
+const Header = ({ profilePhoto, onLogout }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const toggleDropdown = () => setShowDropdown(!showDropdown);
+  return (
+    <div className="absolute top-0 right-0 p-4">
+      <div className="relative cursor-pointer" onClick={toggleDropdown}>
+        {profilePhoto ? (
+          <img src={profilePhoto} alt="Profile" className="w-10 h-10 rounded-full" />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold">
+            P
+          </div>
+        )}
+        {showDropdown && (
+          <div className="absolute right-0 mt-2 bg-white border rounded shadow-lg">
+            <button onClick={onLogout} className="px-4 py-2 text-sm">Logout</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const CandidateDashboard = () => {
-  
+  const [activePanel, setActivePanel] = useState('dashboard');
+
+  // Candidate profile state – note phone field is removed.
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    // Removed phone field
+    countryCode: '+1', // not used anymore
+    mobileCountryCode: '+1',
+    mobileNumber: '',
+    whatsappSame: false,
+    whatsappCountryCode: '+1',
+    whatsappNumber: '',
+    password: '',
     currentLocation: '',
     preferredLocation: '',
-    driversLicense: '',
-    workAuthorization: '',
-    experienceLevel: '',
-    preferredWorkModel: '',
-    documents: []
+    // Now locationIdProof shows all states
+    locationIdProof: '',
+    // Documents for specific uploads:
+    idProof: null,
+    passport: null,
+    visaCopy: null,
+    // Profile photo to be shown in header
+    profilePhoto: null
   });
-  
+  // Backup state to restore candidate info if canceled
+  const [backupProfile, setBackupProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
-  const [submissions, setSubmissions] = useState([]);
+
+  // Submissions – add a dummy submission for demonstration
+  const [submissions, setSubmissions] = useState([
+    { id: 1, date: "2025-04-07", company: "ABC Inc", position: "Developer", location: "NY", status: "submitted", vendor: "Vendor X", rate: 50 }
+  ]);
+  // For inline editing of a submission row
+  const [editingSubmissionId, setEditingSubmissionId] = useState(null);
+  const [editingSubmissionData, setEditingSubmissionData] = useState({});
+
+  // Analytics (unchanged demo data)
   const [analytics, setAnalytics] = useState({
     totalSubmissions: 0,
     interviewRate: 0,
@@ -29,121 +141,115 @@ const CandidateDashboard = () => {
     weeklySubmissions: [],
     monthlySubmissions: []
   });
-  
   const [submissionFilter, setSubmissionFilter] = useState('all');
   const [submissionSort, setSubmissionSort] = useState('date');
   const [selectedTimeframe, setSelectedTimeframe] = useState('weekly');
-  
-  // Mock data for analytics - in a real app, this would come from an API
+
+  // Recruiter – set to null so that no recruiter is assigned by default
+  const [recruiter, setRecruiter] = useState(null);
+
   useEffect(() => {
-    // Simulate API call to get submissions data
-    const mockSubmissions = [
-      // This would be populated from an API in a real application
-    ];
-    
-    // Calculate analytics based on submissions
-    const today = new Date();
+    // For analytics, create demo weekly and monthly data.
     const weeklyData = Array(12).fill().map((_, i) => ({
       name: `Week ${i+1}`,
       submissions: Math.floor(Math.random() * 8) + 1,
-      interviews: Math.floor(Math.random() * 5),
+      interviews: Math.floor(Math.random() * 5)
     }));
-    
     const monthlyData = Array(6).fill().map((_, i) => ({
       name: `Month ${i+1}`,
       submissions: Math.floor(Math.random() * 22) + 5,
-      interviews: Math.floor(Math.random() * 12) + 2,
+      interviews: Math.floor(Math.random() * 12) + 2
     }));
-    
-    setSubmissions(mockSubmissions);
     setAnalytics({
       totalSubmissions: weeklyData.reduce((sum, week) => sum + week.submissions, 0),
-      interviewRate: 0, // Percentage
-      selectionRate: 0, // Percentage
-      marketingDays: 0, // Days from account creation to first job
+      interviewRate: 0,
+      selectionRate: 0,
+      marketingDays: 0,
       weeklySubmissions: weeklyData,
       monthlySubmissions: monthlyData
     });
   }, []);
-  
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour >= 0 && hour < 5) return 'Hello Nightowl';
-    if (hour < 12) return 'Good Morning';
-    if (hour < 18) return 'Good Afternoon';
-    return 'Good Evening';
+
+  // When editing candidate info, save a backup copy so cancel can revert changes.
+  const handleEditProfile = () => {
+    setBackupProfile({ ...profile });
+    setIsEditing(true);
   };
-  
+
+  const handleCancelProfileEdit = () => {
+    if (backupProfile) {
+      setProfile(backupProfile);
+    }
+    setIsEditing(false);
+  };
+
+  // Handle candidate input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfile({
-      ...profile,
-      [name]: value
-    });
+    const { name, value, type, checked } = e.target;
+    let newValue = type === 'checkbox' ? checked : value;
+
+    // If toggling the "whatsappSame" checkbox, update whatsappNumber accordingly
+    if (name === 'whatsappSame') {
+      setProfile((prev) => ({
+        ...prev,
+        whatsappSame: newValue,
+        whatsappNumber: newValue ? prev.mobileNumber : prev.whatsappNumber
+      }));
+      return;
+    }
+    // If mobileNumber changes and whatsappSame is true, update whatsappNumber too.
+    if (name === 'mobileNumber' && profile.whatsappSame) {
+      setProfile((prev) => ({
+        ...prev,
+        mobileNumber: newValue,
+        whatsappNumber: newValue
+      }));
+      return;
+    }
+    setProfile((prev) => ({ ...prev, [name]: newValue }));
   };
-  
-  const handleDocumentUpload = (e) => {
-    const newFiles = Array.from(e.target.files);
-    setProfile({
-      ...profile,
-      documents: [...profile.documents, ...newFiles]
-    });
+
+  // Handle file uploads for documents and profile photo
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      const fileUrl = URL.createObjectURL(files[0]);
+      setProfile((prev) => ({ ...prev, [name]: fileUrl }));
+      // If this is the profile photo, update header automatically.
+      if (name === 'profilePhoto') {
+        // Header uses profile.profilePhoto so it updates automatically.
+      }
+    }
   };
-  
-  const handleRemoveDocument = (index) => {
-    const updatedDocs = [...profile.documents];
-    updatedDocs.splice(index, 1);
-    setProfile({
-      ...profile,
-      documents: updatedDocs
-    });
-  };
-  
+
+  // Validate candidate form (only minimal validation is shown)
   const validateForm = () => {
     const newErrors = {};
-    
-    // Make first name mandatory
     if (!profile.firstName) newErrors.firstName = 'First name is required';
-    
-    // Make last name mandatory
     if (!profile.lastName) newErrors.lastName = 'Last name is required';
-    
-    // Email validation
     if (!profile.email) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(profile.email)) newErrors.email = 'Email is invalid';
-    
-    // Phone validation
-    if (!profile.phone) newErrors.phone = 'Phone number is required';
-    
-    // Work authorization validation
     if (!profile.workAuthorization) newErrors.workAuthorization = 'Work authorization is required';
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
-  const handleSubmit = () => {
+
+  const handleSubmitProfile = () => {
     if (validateForm()) {
       setIsEditing(false);
       console.log('Profile saved:', profile);
     }
   };
-  
-  const handleFilterChange = (e) => {
-    setSubmissionFilter(e.target.value);
-  };
-  
-  const handleSortChange = (e) => {
-    setSubmissionSort(e.target.value);
-  };
-  
+
+  // Submission filtering and sorting functions
+  const handleFilterChange = (e) => setSubmissionFilter(e.target.value);
+  const handleSortChange = (e) => setSubmissionSort(e.target.value);
+
   const getFilteredSubmissions = () => {
     let filtered = [...submissions];
-    
     if (submissionFilter !== 'all') {
-      filtered = filtered.filter(sub => sub.status === submissionFilter);
+      filtered = filtered.filter((sub) => sub.status === submissionFilter);
     }
-    
     filtered.sort((a, b) => {
       let comparison = 0;
       switch (submissionSort) {
@@ -162,13 +268,11 @@ const CandidateDashboard = () => {
         default:
           comparison = 0;
       }
-      
-      return -comparison; // Default to descending
+      return -comparison;
     });
-    
     return filtered;
   };
-  
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'submitted':
@@ -185,8 +289,50 @@ const CandidateDashboard = () => {
         return '';
     }
   };
-  
-  // Work authorization options
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 0 && hour < 5) return 'Hello Nightowl';
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
+  // Recruiter copy details function
+  const copyRecruiterDetails = () => {
+    if (recruiter) {
+      const details = `Name: ${recruiter.name}\nEmail: ${recruiter.email}\nPhone: ${recruiter.phone}`;
+      navigator.clipboard.writeText(details);
+    }
+  };
+
+  // --- Functions for inline editing of submissions ---
+  const handleSubmissionEdit = (submission) => {
+    setEditingSubmissionId(submission.id);
+    setEditingSubmissionData({ ...submission });
+  };
+
+  const handleSubmissionChange = (e) => {
+    const { name, value } = e.target;
+    setEditingSubmissionData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmissionSave = () => {
+    setSubmissions((prev) =>
+      prev.map((sub) =>
+        sub.id === editingSubmissionId ? editingSubmissionData : sub
+      )
+    );
+    setEditingSubmissionId(null);
+    setEditingSubmissionData({});
+  };
+
+  const handleSubmissionCancel = () => {
+    setEditingSubmissionId(null);
+    setEditingSubmissionData({});
+  };
+
+  // Options for work information dropdowns (unchanged)
   const authorizationOptions = [
     { value: '', label: 'Select work authorization *' },
     { value: 'USC', label: 'USC' },
@@ -195,7 +341,6 @@ const CandidateDashboard = () => {
     { value: 'OPT', label: 'OPT/CPT' },
     { value: 'GC', label: 'GC' }
   ];
-  
   const experienceLevels = [
     { value: '', label: 'Select experience level' },
     { value: 'entry', label: 'Entry Level (0-2 years)' },
@@ -203,72 +348,293 @@ const CandidateDashboard = () => {
     { value: 'senior', label: 'Senior Level (6-10 years)' },
     { value: 'expert', label: 'Expert Level (10+ years)' }
   ];
-  
   const workModelOptions = [
     { value: '', label: 'Select preferred work model' },
     { value: 'onsite', label: 'On-site' },
     { value: 'remote', label: 'Remote' },
     { value: 'hybrid', label: 'Hybrid' }
   ];
-  
-  const locationOptions = [
-    { value: '', label: 'Select preferred location' },
-    { value: 'New York, NY', label: 'New York, NY' },
-    { value: 'San Francisco, CA', label: 'San Francisco, CA' },
-    { value: 'Austin, TX', label: 'Austin, TX' },
-    { value: 'Chicago, IL', label: 'Chicago, IL' },
-    { value: 'Seattle, WA', label: 'Seattle, WA' },
-    { value: 'Boston, MA', label: 'Boston, MA' },
-    { value: 'Los Angeles, CA', label: 'Los Angeles, CA' },
-    { value: 'Denver, CO', label: 'Denver, CO' }
-  ];
-  
-  const statusOptions = [
-    { value: 'all', label: 'All Status' },
-    { value: 'submitted', label: 'Submitted' },
-    { value: 'interview', label: 'Interview Scheduled' },
-    { value: 'feedback', label: 'Feedback Pending' },
-    { value: 'selected', label: 'Selected' },
-    { value: 'rejected', label: 'Rejected' }
-  ];
-  
-  const sortOptions = [
-    { value: 'date', label: 'Submission Date' },
-    { value: 'company', label: 'Company' },
-    { value: 'position', label: 'Position' },
-    { value: 'rate', label: 'Rate' }
-  ];
-  
+
   return (
-    <div className="candidate-dashboard bg-blue-30 min-h-screen">
-      {/* Header - reduced size */}
-      <header className="bg-blue-300 text-white shadow-md py-3">
-        <div className="container mx-auto">
-          <div className="flex items-center">
-            <img src={Logo} alt="Company Logo" className="h-16 mr-2" />
-            <h1 className="text-lg font-bold"></h1>
+    <div className="min-h-screen relative">
+      {/* Header with profile symbol on the top right */}
+      <Header profilePhoto={profile.profilePhoto} onLogout={() => alert("Logging out...")} />
+
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="w-1/4 bg-gray-100 p-4">
+          <div className="mb-8">
+            <img src={Logo} alt="Company Logo" className="h-16 mx-auto" />
           </div>
-        </div>
-      </header>
-      
-      {/* Main Content */}
-      <main className="container mx-auto p-4">
-        {/* Greeting */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold">{getGreeting()}, {profile.firstName || 'Candidate'}</h2>
-        </div>
-        
-        {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Profile */}
-          <div className="lg:col-span-2">
-            {/* Profile Section */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <nav>
+            <ul className="space-y-4">
+              <li
+                onClick={() => setActivePanel('dashboard')}
+                className={`cursor-pointer p-2 rounded ${activePanel === 'dashboard' ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
+              >
+                Dashboard
+              </li>
+              <li
+                onClick={() => setActivePanel('submissions')}
+                className={`cursor-pointer p-2 rounded ${activePanel === 'submissions' ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
+              >
+                Submissions
+              </li>
+              <li
+                onClick={() => setActivePanel('recruiter')}
+                className={`cursor-pointer p-2 rounded ${activePanel === 'recruiter' ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
+              >
+                Recruiter Information
+              </li>
+              <li
+                onClick={() => setActivePanel('candidate')}
+                className={`cursor-pointer p-2 rounded ${activePanel === 'candidate' ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'}`}
+              >
+                Candidate Information
+              </li>
+            </ul>
+          </nav>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 p-4">
+          {activePanel === 'dashboard' && (
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold mb-4">Analytics Dashboard</h2>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-500">Total Submissions</p>
+                  <p className="text-2xl font-bold">{analytics.totalSubmissions}</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-500">Interview Rate</p>
+                  <p className="text-2xl font-bold">{analytics.interviewRate}%</p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-500">Selection Rate</p>
+                  <p className="text-2xl font-bold">{analytics.selectionRate}%</p>
+                </div>
+                <div className="bg-amber-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-500">Marketing Days</p>
+                  <p className="text-2xl font-bold">{analytics.marketingDays}</p>
+                </div>
+              </div>
+              <div className="mb-4 flex justify-between items-center">
+                <h3 className="font-bold">Submission Trends</h3>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setSelectedTimeframe('weekly')}
+                    className={`px-3 py-1 text-sm rounded ${selectedTimeframe === 'weekly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                  >
+                    Weekly
+                  </button>
+                  <button
+                    onClick={() => setSelectedTimeframe('monthly')}
+                    className={`px-3 py-1 text-sm rounded ${selectedTimeframe === 'monthly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                  >
+                    Monthly
+                  </button>
+                </div>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={selectedTimeframe === 'weekly' ? analytics.weeklySubmissions : analytics.monthlySubmissions}
+                    margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="submissions" stroke="#3b82f6" strokeWidth={2} />
+                    <Line type="monotone" dataKey="interviews" stroke="#10b981" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {activePanel === 'submissions' && (
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4">Submission History</h2>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                  <div>
+                    <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
+                    <select
+                      id="statusFilter"
+                      value={submissionFilter}
+                      onChange={handleFilterChange}
+                      className="w-full sm:w-40 border rounded p-2"
+                    >
+                      {[
+                        { value: 'all', label: 'All Status' },
+                        { value: 'submitted', label: 'Submitted ⏳' },
+                        { value: 'interview', label: 'Interview Scheduled 📅' },
+                        { value: 'feedback', label: 'Feedback Pending 🔍' },
+                        { value: 'selected', label: 'Selected ✅' },
+                        { value: 'rejected', label: 'Rejected ❌' }
+                      ].map((option, index) => (
+                        <option key={index} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="sortBy" className="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
+                    <select
+                      id="sortBy"
+                      value={submissionSort}
+                      onChange={handleSortChange}
+                      className="w-full sm:w-40 border rounded p-2"
+                    >
+                      {[
+                        { value: 'date', label: 'Submission Date' },
+                        { value: 'company', label: 'Company' },
+                        { value: 'position', label: 'Position' },
+                        { value: 'rate', label: 'Rate' }
+                      ].map((option, index) => (
+                        <option key={index} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="text-gray-500 text-sm self-end">
+                  {getFilteredSubmissions().length} submissions found
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {getFilteredSubmissions().length > 0 ? (
+                      getFilteredSubmissions().map((submission, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="p-3 whitespace-nowrap">{submission.date}</td>
+                          <td className="p-3 whitespace-nowrap">
+                            {editingSubmissionId === submission.id ? (
+                              <input
+                                type="text"
+                                name="company"
+                                value={editingSubmissionData.company || ''}
+                                onChange={handleSubmissionChange}
+                                className="border rounded p-1"
+                              />
+                            ) : (
+                              submission.company
+                            )}
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            {editingSubmissionId === submission.id ? (
+                              <input
+                                type="text"
+                                name="position"
+                                value={editingSubmissionData.position || ''}
+                                onChange={handleSubmissionChange}
+                                className="border rounded p-1"
+                              />
+                            ) : (
+                              submission.position
+                            )}
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            {editingSubmissionId === submission.id ? (
+                              <input
+                                type="text"
+                                name="location"
+                                value={editingSubmissionData.location || ''}
+                                onChange={handleSubmissionChange}
+                                className="border rounded p-1"
+                              />
+                            ) : (
+                              submission.location
+                            )}
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100">
+                              {getStatusIcon(submission.status)} {submission.status}
+                            </span>
+                          </td>
+                          <td className="p-3 whitespace-nowrap">{submission.vendor}</td>
+                          <td className="p-3 whitespace-nowrap">
+                            {editingSubmissionId === submission.id ? (
+                              <input
+                                type="number"
+                                name="rate"
+                                value={editingSubmissionData.rate || ''}
+                                onChange={handleSubmissionChange}
+                                className="border rounded p-1 w-16"
+                              />
+                            ) : (
+                              `$${submission.rate}/hr`
+                            )}
+                          </td>
+                          <td className="p-3 whitespace-nowrap">
+                            {editingSubmissionId === submission.id ? (
+                              <div className="flex space-x-2">
+                                <button onClick={handleSubmissionSave} className="bg-green-500 text-white px-2 py-1 rounded text-xs">Save</button>
+                                <button onClick={handleSubmissionCancel} className="bg-gray-500 text-white px-2 py-1 rounded text-xs">Cancel</button>
+                              </div>
+                            ) : (
+                              <button onClick={() => handleSubmissionEdit(submission)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs">Edit</button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="8" className="p-3 text-center text-gray-500">No submission records found</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activePanel === 'recruiter' && (
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-4">Recruiter Information</h2>
+              {recruiter ? (
+                <div className="space-y-4">
+                  <p><strong>Name:</strong> {recruiter.name}</p>
+                  <p><strong>Email:</strong> {recruiter.email}</p>
+                  <p><strong>Phone:</strong> {recruiter.phone}</p>
+                  <button
+                    onClick={copyRecruiterDetails}
+                    className="mt-4 bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                  >
+                    Copy Details
+                  </button>
+                </div>
+              ) : (
+                <p>no recruiter assigned yet</p>
+              )}
+            </div>
+          )}
+
+          {activePanel === 'candidate' && (
+            <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Personal Information</h2>
                 {!isEditing ? (
                   <button 
-                    onClick={() => setIsEditing(true)}
+                    onClick={handleEditProfile}
                     className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded"
                   >
                     Edit Profile
@@ -276,13 +642,13 @@ const CandidateDashboard = () => {
                 ) : (
                   <div className="space-x-2">
                     <button 
-                      onClick={handleSubmit}
+                      onClick={handleSubmitProfile}
                       className="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded"
                     >
                       Save
                     </button>
                     <button 
-                      onClick={() => setIsEditing(false)}
+                      onClick={handleCancelProfileEdit}
                       className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded"
                     >
                       Cancel
@@ -290,9 +656,8 @@ const CandidateDashboard = () => {
                   </div>
                 )}
               </div>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Basic Information */}
+                {/* Contact Details */}
                 <div>
                   <h3 className="font-bold mb-4">Contact Details</h3>
                   <div className="space-y-4">
@@ -334,7 +699,6 @@ const CandidateDashboard = () => {
                         )}
                       </div>
                     </div>
-                    
                     <div>
                       <label className="block text-gray-700 mb-1">Email Address *</label>
                       {isEditing ? (
@@ -353,23 +717,98 @@ const CandidateDashboard = () => {
                         <p>{profile.email || 'Not provided'}</p>
                       )}
                     </div>
-                    
+                    {/* Removed Phone Number field as per requirements */}
                     <div>
-                      <label className="block text-gray-700 mb-1">Phone Number *</label>
+                      <label className="block text-gray-700 mb-1">Mobile Number *</label>
+                      {isEditing ? (
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="col-span-1">
+                            <select
+                              name="mobileCountryCode"
+                              value={profile.mobileCountryCode}
+                              onChange={handleChange}
+                              className="w-full border rounded p-2"
+                            >
+                              <option value="+1">USA (+1)</option>
+                              <option value="+91">India (+91)</option>
+                            </select>
+                          </div>
+                          <div className="col-span-2">
+                            <input
+                              type="tel"
+                              name="mobileNumber"
+                              value={profile.mobileNumber}
+                              onChange={handleChange}
+                              maxLength="10"
+                              className="w-full border rounded p-2"
+                              placeholder="enter 10 digit mobile number"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <p>{profile.mobileCountryCode} {profile.mobileNumber || 'Not provided'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-1">WhatsApp Number *</label>
+                      {isEditing ? (
+                        <>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              name="whatsappSame"
+                              checked={profile.whatsappSame}
+                              onChange={handleChange}
+                            />
+                            <span>Same for WhatsApp</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="col-span-1">
+                              <select
+                                name="whatsappCountryCode"
+                                value={profile.whatsappCountryCode}
+                                onChange={handleChange}
+                                className="w-full border rounded p-2"
+                                disabled={profile.whatsappSame}
+                              >
+                                <option value="+1">USA (+1)</option>
+                                <option value="+91">India (+91)</option>
+                              </select>
+                            </div>
+                            <div className="col-span-2">
+                              <input
+                                type="tel"
+                                name="whatsappNumber"
+                                value={profile.whatsappNumber}
+                                onChange={handleChange}
+                                maxLength="10"
+                                className="w-full border rounded p-2"
+                                placeholder="enter 10 digit mobile number"
+                                disabled={profile.whatsappSame}
+                              />
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <p>{profile.whatsappNumber || 'Not provided'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-1">Password *</label>
                       {isEditing ? (
                         <>
                           <input
-                            type="tel"
-                            name="phone"
-                            value={profile.phone}
+                            type="password"
+                            name="password"
+                            value={profile.password}
                             onChange={handleChange}
-                            className={`w-full border rounded p-2 ${errors.phone ? 'border-red-500' : ''}`}
-                            placeholder="Enter phone number"
+                            className="w-full border rounded p-2"
+                            placeholder="Enter password"
                           />
-                          {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                          <PasswordStrengthIndicator password={profile.password} />
                         </>
                       ) : (
-                        <p>{profile.phone || 'Not provided'}</p>
+                        <p>******</p>
                       )}
                     </div>
                   </div>
@@ -382,19 +821,22 @@ const CandidateDashboard = () => {
                     <div>
                       <label className="block text-gray-700 mb-1">Current Location</label>
                       {isEditing ? (
-                        <input
-                          type="text"
+                        <select
                           name="currentLocation"
                           value={profile.currentLocation}
                           onChange={handleChange}
                           className="w-full border rounded p-2"
-                          placeholder="Enter current location"
-                        />
+                        >
+                          {usStates.map((state, index) => (
+                            <option key={index} value={state.value}>
+                              {state.label}
+                            </option>
+                          ))}
+                        </select>
                       ) : (
                         <p>{profile.currentLocation || 'Not provided'}</p>
                       )}
                     </div>
-                    
                     <div>
                       <label className="block text-gray-700 mb-1">Preferred Location</label>
                       {isEditing ? (
@@ -404,285 +846,116 @@ const CandidateDashboard = () => {
                           onChange={handleChange}
                           className="w-full border rounded p-2"
                         >
-                          {locationOptions.map((option, index) => (
-                            <option key={index} value={option.value}>{option.label}</option>
+                          {usStates.map((state, index) => (
+                            <option key={index} value={state.value}>
+                              {state.label}
+                            </option>
                           ))}
                         </select>
                       ) : (
-                        <p>
-                          {locationOptions.find(o => o.value === profile.preferredLocation)?.label || 'Not provided'}
-                        </p>
+                        <p>{profile.preferredLocation || 'Not provided'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-1">Location ID Proof</label>
+                      {isEditing ? (
+                        <select
+                          name="locationIdProof"
+                          value={profile.locationIdProof}
+                          onChange={handleChange}
+                          className="w-full border rounded p-2"
+                        >
+                          {usStates.map((state, index) => (
+                            <option key={index} value={state.value}>
+                              {state.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p>{profile.locationIdProof || 'Not provided'}</p>
                       )}
                     </div>
                   </div>
                 </div>
               </div>
               
+              {/* Documents & Profile Photo Section */}
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="font-bold mb-4">Work Information</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-gray-700 mb-1">Work Authorization *</label>
-                      {isEditing ? (
-                        <>
-                          <select
-                            name="workAuthorization"
-                            value={profile.workAuthorization}
-                            onChange={handleChange}
-                            className={`w-full border rounded p-2 ${errors.workAuthorization ? 'border-red-500' : ''}`}
-                          >
-                            {authorizationOptions.map((option, index) => (
-                              <option key={index} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
-                          {errors.workAuthorization && <p className="text-red-500 text-sm mt-1">{errors.workAuthorization}</p>}
-                        </>
-                      ) : (
-                        <p>
-                          {authorizationOptions.find(o => o.value === profile.workAuthorization)?.label || 'Not provided'}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="block text-gray-700 mb-1">Experience Level</label>
-                      {isEditing ? (
-                        <select
-                          name="experienceLevel"
-                          value={profile.experienceLevel}
-                          onChange={handleChange}
+                  <h3 className="font-bold mb-4">Documents</h3>
+                  {isEditing && (
+                    <>
+                      <div className="mb-4">
+                        <label className="block text-gray-700 mb-1">ID Proof</label>
+                        <input
+                          type="file"
+                          name="idProof"
+                          onChange={handleFileChange}
                           className="w-full border rounded p-2"
-                        >
-                          {experienceLevels.map((option, index) => (
-                            <option key={index} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p>
-                          {experienceLevels.find(o => o.value === profile.experienceLevel)?.label || 'Not provided'}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="block text-gray-700 mb-1">Preferred Work Model</label>
-                      {isEditing ? (
-                        <select
-                          name="preferredWorkModel"
-                          value={profile.preferredWorkModel}
-                          onChange={handleChange}
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-gray-700 mb-1">Passport</label>
+                        <input
+                          type="file"
+                          name="passport"
+                          onChange={handleFileChange}
                           className="w-full border rounded p-2"
-                        >
-                          {workModelOptions.map((option, index) => (
-                            <option key={index} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p>
-                          {workModelOptions.find(o => o.value === profile.preferredWorkModel)?.label || 'Not provided'}
-                        </p>
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-gray-700 mb-1">Visa Copy</label>
+                        <input
+                          type="file"
+                          name="visaCopy"
+                          onChange={handleFileChange}
+                          className="w-full border rounded p-2"
+                        />
+                      </div>
+                    </>
+                  )}
+                  <div>
+                    <h4 className="font-medium mb-2">Uploaded Documents</h4>
+                    <ul className="space-y-2">
+                      {profile.idProof && <li className="bg-gray-50 p-2 rounded">ID Proof Uploaded</li>}
+                      {profile.passport && <li className="bg-gray-50 p-2 rounded">Passport Uploaded</li>}
+                      {profile.visaCopy && <li className="bg-gray-50 p-2 rounded">Visa Copy Uploaded</li>}
+                      {!(profile.idProof || profile.passport || profile.visaCopy) && (
+                        <li className="text-gray-500">No documents uploaded</li>
                       )}
-                    </div>
+                    </ul>
                   </div>
                 </div>
-                
                 <div>
-                  <h3 className="font-bold mb-4">Documents</h3>
-                  {isEditing ? (
+                  <h3 className="font-bold mb-4">Profile Photo</h3>
+                  {isEditing && (
                     <div>
                       <input
                         type="file"
-                        multiple
-                        onChange={handleDocumentUpload}
+                        name="profilePhoto"
+                        onChange={handleFileChange}
                         className="w-full border p-2 rounded"
                       />
-                      <p className="text-sm text-gray-500 mt-1">Upload resumes, certifications, or other documents</p>
+                      <p className="text-sm text-gray-500 mt-1">Upload or change your profile photo</p>
                     </div>
-                  ) : null}
-                  
-                  <div className="mt-4">
-                    <h4 className="font-medium mb-2">Uploaded Documents</h4>
-                    {profile.documents.length > 0 ? (
-                      <ul className="space-y-2">
-                        {profile.documents.map((doc, index) => (
-                          <li key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                            <span>{doc.name}</span>
-                            {isEditing && (
-                              <button 
-                                onClick={() => handleRemoveDocument(index)}
-                                className="text-red-500"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-gray-500">No documents uploaded</p>
-                    )}
-                  </div>
+                  )}
+                  {!isEditing && (
+                    <div>
+                      {profile.profilePhoto ? (
+                        <img src={profile.profilePhoto} alt="Profile" className="w-24 h-24 rounded-full" />
+                      ) : (
+                        <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center font-bold">
+                          P
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-            
-            {/* Submission History */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-bold mb-4">Submission History</h2>
-              
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                  <div>
-                    <label htmlFor="statusFilter" className="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
-                    <select
-                      id="statusFilter"
-                      value={submissionFilter}
-                      onChange={handleFilterChange}
-                      className="w-full sm:w-40 border rounded p-2"
-                    >
-                      {statusOptions.map((option, index) => (
-                        <option key={index} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="sortBy" className="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
-                    <select
-                      id="sortBy"
-                      value={submissionSort}
-                      onChange={handleSortChange}
-                      className="w-full sm:w-40 border rounded p-2"
-                    >
-                      {sortOptions.map((option, index) => (
-                        <option key={index} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="text-gray-500 text-sm self-end">
-                  {getFilteredSubmissions().length} submissions found
-                </div>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-                      <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {getFilteredSubmissions().length > 0 ? (
-                      getFilteredSubmissions().map((submission, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="p-3 whitespace-nowrap">{submission.date}</td>
-                          <td className="p-3">{submission.company}</td>
-                          <td className="p-3">{submission.position}</td>
-                          <td className="p-3">{submission.location}</td>
-                          <td className="p-3">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100">
-                              {getStatusIcon(submission.status)} {' '}
-                              {statusOptions.find(o => o.value === submission.status)?.label.replace(' ', '\u00A0')}
-                            </span>
-                          </td>
-                          <td className="p-3">{submission.vendor}</td>
-                          <td className="p-3">${submission.rate}/hr</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="p-3 text-center text-gray-500">No submission records found</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          
-          {/* Right Column - Analytics */}
-          <div className="lg:col-span-1">
-            {/* Analytics Section */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-bold mb-4">Analytics Dashboard</h2>
-              
-              {/* Key Metrics */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Total Submissions</p>
-                  <p className="text-2xl font-bold">{analytics.totalSubmissions}</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Interview Rate</p>
-                  <p className="text-2xl font-bold">{analytics.interviewRate}%</p>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Selection Rate</p>
-                  <p className="text-2xl font-bold">{analytics.selectionRate}%</p>
-                </div>
-                <div className="bg-amber-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-500">Marketing Days</p>
-                  <p className="text-2xl font-bold">{analytics.marketingDays}</p>
-                </div>
-              </div>
-              
-              {/* Submission Trends Graph */}
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-bold">Submission Trends</h3>
-                  <div className="flex space-x-2">
-                    <button 
-                      className={`px-3 py-1 text-sm rounded ${selectedTimeframe === 'weekly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                      onClick={() => setSelectedTimeframe('weekly')}
-                    >
-                      Weekly
-                    </button>
-                    <button 
-                      className={`px-3 py-1 text-sm rounded ${selectedTimeframe === 'monthly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                      onClick={() => setSelectedTimeframe('monthly')}
-                    >
-                      Monthly
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={selectedTimeframe === 'weekly' ? analytics.weeklySubmissions : analytics.monthlySubmissions}
-                      margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line type="monotone" dataKey="submissions" stroke="#3b82f6" strokeWidth={2} />
-                      <Line type="monotone" dataKey="interviews" stroke="#10b981" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-      
-      {/* Footer
-      <footer className="bg-gray-800 text-white p-4 mt-8">
-        <div className="container mx-auto text-center">
-          <p>© 2025 Talent Connect. All rights reserved.</p>
-        </div>
-      </footer> */}
+          )}
+        </main>
+      </div>
     </div>
   );
 };
