@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Logo from "../../assets/VassInc_logo.png";
-import {LineChart,
+import {
+  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -48,12 +49,31 @@ const workModelOptions = [
   { value: 'hybrid', label: 'Hybrid' }
 ];
 
+// Country code options
+const countryCodes = [
+  { value: '+1', label: 'USA (+1)' },
+  { value: '+91', label: 'India (+91)' }
+];
+
 // Password strength
 const PasswordStrengthIndicator = ({ password }) => {
   const hasUppercase = /[A-Z]/.test(password);
-  const strength = password.length === 0 ? '' : hasUppercase ? 'Strong' : 'Weak';
+  const hasNumber = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  
+  let strength = 'Weak';
+  let colorClass = 'text-red-500';
+  
+  if (password.length >= 8 && hasUppercase && (hasNumber || hasSpecialChar)) {
+    strength = 'Strong';
+    colorClass = 'text-green-500';
+  } else if (password.length >= 6 && (hasUppercase || hasNumber || hasSpecialChar)) {
+    strength = 'Medium';
+    colorClass = 'text-yellow-500';
+  }
+  
   return (
-    <p className="text-sm mt-1">
+    <p className={`text-sm mt-1 ${colorClass}`}>
       {password.length > 0 && `Password Strength: ${strength}`}
     </p>
   );
@@ -111,8 +131,10 @@ const CandidateDashboard = () => {
     firstName: '',
     lastName: '',
     email: '',
+    mobileCountryCode: '+1',
     mobileNumber: '',
     whatsappSame: false,
+    whatsappCountryCode: '+1',
     whatsappNumber: '',
     password: '',
     currentLocation: '',
@@ -124,6 +146,9 @@ const CandidateDashboard = () => {
     documents: [],
     profilePhoto: null
   });
+  
+  // Password history for last 5 passwords
+  const [passwordHistory, setPasswordHistory] = useState([]);
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -171,7 +196,14 @@ const CandidateDashboard = () => {
       setProfile((prev) => ({
         ...prev,
         whatsappSame: checked,
-        whatsappNumber: checked ? prev.mobileNumber : prev.whatsappNumber
+        whatsappNumber: checked ? prev.mobileNumber : prev.whatsappNumber,
+        whatsappCountryCode: checked ? prev.mobileCountryCode : prev.whatsappCountryCode
+      }));
+    } else if (name === 'mobileCountryCode' && profile.whatsappSame) {
+      setProfile((prev) => ({
+        ...prev,
+        mobileCountryCode: value,
+        whatsappCountryCode: value
       }));
     } else {
       setProfile((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
@@ -211,7 +243,9 @@ const CandidateDashboard = () => {
     if (!profile.email.trim()) newErrors.email = 'Email is required';
     if (!/\S+@\S+\.\S+/.test(profile.email)) newErrors.email = 'Invalid email';
     if (!profile.mobileNumber.trim()) newErrors.mobileNumber = 'Mobile number is required';
+    if (profile.mobileNumber.length < 10) newErrors.mobileNumber = 'Mobile number must be 10 digits';
     if (!profile.whatsappNumber.trim()) newErrors.whatsappNumber = 'WhatsApp number is required';
+    if (profile.whatsappNumber.length < 10) newErrors.whatsappNumber = 'WhatsApp number must be 10 digits';
     if (!profile.workAuthorization.trim()) newErrors.workAuthorization = 'Work authorization is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -222,9 +256,22 @@ const CandidateDashboard = () => {
     if (!passwordData.oldPassword) newErrors.oldPassword = 'Old password is required';
     if (!passwordData.newPassword) newErrors.newPassword = 'New password is required';
     if (!passwordData.confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
+    
+    // Check for uppercase letter
+    if (passwordData.newPassword && !/[A-Z]/.test(passwordData.newPassword)) {
+      newErrors.newPassword = 'Password must contain at least one uppercase letter';
+    }
+    
+    // Check if new password matches any of the last 5 passwords
+    if (passwordData.newPassword && passwordHistory.includes(passwordData.newPassword)) {
+      newErrors.newPassword = 'Cannot reuse any of your last 5 passwords';
+    }
+    
+    // Check if passwords match
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
+    
     setPasswordErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -239,6 +286,13 @@ const CandidateDashboard = () => {
 
   const handleSubmitPassword = () => {
     if (validatePasswordForm()) {
+      // Add the new password to password history
+      const updatedHistory = [
+        passwordData.newPassword, 
+        ...passwordHistory.slice(0, 4) // Keep only the last 4 + new one = 5 total
+      ];
+      setPasswordHistory(updatedHistory);
+      
       console.log('Password change submitted:', passwordData);
       setChangingPassword(false);
       setPasswordData({
@@ -282,6 +336,7 @@ const CandidateDashboard = () => {
           />
           {renderPasswordError('newPassword')}
           <PasswordStrengthIndicator password={passwordData.newPassword} />
+          <p className="text-xs text-gray-600 mt-1">Must contain at least one uppercase letter</p>
         </div>
         <div>
           <label className="block text-gray-700 font-semibold mb-1">Confirm Password *</label>
@@ -316,37 +371,38 @@ const CandidateDashboard = () => {
     <div className="bg-white rounded-lg shadow p-6 border">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-blue-700">Candidate Profile</h2>
-        {!isEditing ? (
-          <div className="space-x-2">
-            <button
-              onClick={() => setChangingPassword(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
-            >
-              Change Password
-            </button>
+        <div className="space-x-2">
+          <button
+            onClick={() => setChangingPassword(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+            disabled={isEditing}
+          >
+            Change Password
+          </button>
+          {!isEditing ? (
             <button
               onClick={handleEditProfile}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
             >
               Edit Profile
             </button>
-          </div>
-        ) : (
-          <div className="space-x-2">
-            <button
-              onClick={handleSubmitProfile}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            >
-              Save
-            </button>
-            <button
-              onClick={handleCancelProfileEdit}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
+          ) : (
+            <>
+              <button
+                onClick={handleSubmitProfile}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+              >
+                Save
+              </button>
+              <button
+                onClick={handleCancelProfileEdit}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Password Change Section */}
@@ -441,19 +497,35 @@ const CandidateDashboard = () => {
           <label className="block text-gray-700 font-semibold mb-1">Mobile Number * (10 digits)</label>
           {isEditing ? (
             <>
-              <input
-                type="text"
-                name="mobileNumber"
-                value={profile.mobileNumber}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                maxLength="10"
-                placeholder="Enter 10-digit mobile number"
-              />
+              <div className="flex">
+                <select
+                  name="mobileCountryCode"
+                  value={profile.mobileCountryCode}
+                  onChange={handleChange}
+                  className="border rounded p-2 mr-2"
+                >
+                  {countryCodes.map((code) => (
+                    <option key={code.value} value={code.value}>{code.label}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  name="mobileNumber"
+                  value={profile.mobileNumber}
+                  onChange={handleChange}
+                  className="w-full border rounded p-2"
+                  maxLength="10"
+                  placeholder="Enter 10-digit mobile number"
+                />
+              </div>
               {renderError('mobileNumber')}
             </>
           ) : (
-            <p className="text-gray-800">{profile.mobileNumber || 'Not provided'}</p>
+            <p className="text-gray-800">
+              {profile.mobileCountryCode && profile.mobileNumber ? 
+                `${profile.mobileCountryCode} ${profile.mobileNumber}` : 
+                'Not provided'}
+            </p>
           )}
         </div>
 
@@ -470,20 +542,37 @@ const CandidateDashboard = () => {
                 />
                 <span className="text-sm">Same as mobile</span>
               </div>
-              <input
-                type="text"
-                name="whatsappNumber"
-                value={profile.whatsappNumber}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-                maxLength="10"
-                disabled={profile.whatsappSame}
-                placeholder="Enter 10-digit WhatsApp number"
-              />
+              <div className="flex">
+                <select
+                  name="whatsappCountryCode"
+                  value={profile.whatsappCountryCode}
+                  onChange={handleChange}
+                  className="border rounded p-2 mr-2"
+                  disabled={profile.whatsappSame}
+                >
+                  {countryCodes.map((code) => (
+                    <option key={code.value} value={code.value}>{code.label}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  name="whatsappNumber"
+                  value={profile.whatsappNumber}
+                  onChange={handleChange}
+                  className="w-full border rounded p-2"
+                  maxLength="10"
+                  disabled={profile.whatsappSame}
+                  placeholder="Enter 10-digit WhatsApp number"
+                />
+              </div>
               {renderError('whatsappNumber')}
             </>
           ) : (
-            <p className="text-gray-800">{profile.whatsappNumber || 'Not provided'}</p>
+            <p className="text-gray-800">
+              {profile.whatsappCountryCode && profile.whatsappNumber ? 
+                `${profile.whatsappCountryCode} ${profile.whatsappNumber}` : 
+                'Not provided'}
+            </p>
           )}
         </div>
       </div>
@@ -507,15 +596,7 @@ const CandidateDashboard = () => {
               {renderError('workAuthorization')}
             </>
           ) : (
-            <div className="flex justify-between items-center">
-              <p className="text-gray-800">{profile.workAuthorization || 'Not provided'}</p>
-              <button 
-                onClick={() => setIsEditing(true)}
-                className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded"
-              >
-                Change
-              </button>
-            </div>
+            <p className="text-gray-800">{profile.workAuthorization || 'Not provided'}</p>
           )}
         </div>
 
@@ -591,6 +672,33 @@ const CandidateDashboard = () => {
       status: 'submitted',
       vendor: 'Vendor X',
       rate: '$50/hr'
+    },
+    {
+      date: '2025-04-05',
+      company: 'XYZ Corp',
+      position: 'Frontend Developer',
+      location: 'CA',
+      status: 'interview',
+      vendor: 'Vendor Y',
+      rate: '$55/hr'
+    },
+    {
+      date: '2025-04-03',
+      company: 'Tech Solutions',
+      position: 'React Developer',
+      location: 'TX',
+      status: 'selected',
+      vendor: 'Vendor Z',
+      rate: '$60/hr'
+    },
+    {
+      date: '2025-04-01',
+      company: 'Digital Systems',
+      position: 'Full Stack Developer',
+      location: 'FL',
+      status: 'rejected',
+      vendor: 'Vendor A',
+      rate: '$65/hr'
     }
   ]);
   
@@ -605,6 +713,30 @@ const CandidateDashboard = () => {
     weeklySubmissions: [],
     monthlySubmissions: []
   });
+
+  // Function to handle submission filtering
+  const getFilteredSubmissions = () => {
+    let filtered = [...submissions];
+    
+    // Apply status filter
+    if (submissionFilter !== 'all') {
+      filtered = filtered.filter(sub => sub.status === submissionFilter);
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      if (submissionSort === 'date') {
+        return new Date(b.date) - new Date(a.date); // Newest first
+      } else if (submissionSort === 'company') {
+        return a.company.localeCompare(b.company);
+      } else if (submissionSort === 'position') {
+        return a.position.localeCompare(b.position);
+      }
+      return 0;
+    });
+    
+    return filtered;
+  };
 
   useEffect(() => {
     const weeklyData = Array(6).fill().map((_, i) => ({
@@ -642,6 +774,12 @@ const CandidateDashboard = () => {
       default:
         return null;
     }
+  };
+
+  const handleDeleteSubmission = (index) => {
+    const newSubmissions = [...submissions];
+    newSubmissions.splice(index, 1);
+    setSubmissions(newSubmissions);
   };
 
   const renderDashboard = () => (
@@ -703,7 +841,12 @@ const CandidateDashboard = () => {
 
   const renderSubmissions = () => (
     <div className="bg-white rounded-lg shadow p-6 border">
-      <h2 className="text-2xl font-bold text-blue-700 mb-4">Submission History</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-blue-700">Submission History</h2>
+        <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+          Add Submission
+        </button>
+      </div>
       
       <div className="flex flex-wrap justify-between mb-4">
         <div className="mb-2">
@@ -737,7 +880,7 @@ const CandidateDashboard = () => {
       </div>
       
       <div className="mb-2 text-right text-gray-700">
-        {submissions.length} submissions found
+        {getFilteredSubmissions().length} submissions found
       </div>
       
       {submissions.length === 0 ? (
@@ -758,7 +901,7 @@ const CandidateDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {submissions.map((sub, index) => (
+              {getFilteredSubmissions().map((sub, index) => (
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="p-2 border">{sub.date}</td>
                   <td className="p-2 border">{sub.company}</td>
@@ -773,9 +916,17 @@ const CandidateDashboard = () => {
                   <td className="p-2 border">{sub.vendor}</td>
                   <td className="p-2 border">{sub.rate}</td>
                   <td className="p-2 border">
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
-                      Edit
-                    </button>
+                    <div className="flex space-x-2">
+                      <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
+                        Edit
+                      </button>
+                      <button 
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+                        onClick={() => handleDeleteSubmission(index)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
