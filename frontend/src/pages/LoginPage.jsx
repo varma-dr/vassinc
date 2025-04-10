@@ -7,7 +7,7 @@ import Logo from "../assets/VassInc_logo.png";
 const LoginPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "", // Will handle both email and phone
     password: ""
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +19,9 @@ const LoginPage = () => {
 
   // Email validation regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  
+  // Phone validation regex (basic international format)
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
   // Set the page title dynamically
   useEffect(() => {
@@ -52,14 +55,23 @@ const LoginPage = () => {
     }
   };
 
+  const identifierType = (identifier) => {
+    if (emailRegex.test(identifier)) return "email";
+    if (phoneRegex.test(identifier)) return "phone";
+    return null;
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
-    // Validate email
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+    // Validate identifier (email or phone)
+    if (!formData.identifier) {
+      newErrors.identifier = "Email or phone number is required";
+    } else {
+      const type = identifierType(formData.identifier);
+      if (!type) {
+        newErrors.identifier = "Please enter a valid email or phone number";
+      }
     }
     
     // Validate password
@@ -94,11 +106,23 @@ const LoginPage = () => {
       setLoginError("");
       
       try {
-        // Make API call to login endpoint (without userType)
-        const response = await axios.post('http://localhost:5005/api/auth/login', {
-          email: formData.email,
+        // Determine if the identifier is an email or phone
+        const identifierField = identifierType(formData.identifier);
+        
+        // Create appropriate payload based on identifier type
+        const payload = {
           password: formData.password
-        });
+        };
+        
+        // Add the identifier with the correct field name
+        if (identifierField === "email") {
+          payload.email = formData.identifier;
+        } else {
+          payload.phone = formData.identifier;
+        }
+        
+        // Make API call to login endpoint
+        const response = await axios.post('http://localhost:5005/api/auth/login', payload);
         
         // Store token in localStorage (or sessionStorage if remember me is not checked)
         const storage = rememberMe ? localStorage : sessionStorage;
@@ -126,7 +150,7 @@ const LoginPage = () => {
           // Server responded with an error
           if (error.response.status === 400) {
             // Authentication error (wrong credentials)
-            setLoginError(error.response.data.msg || "Invalid email or password");
+            setLoginError(error.response.data.msg || "Invalid credentials");
           } else if (error.response.status === 404) {
             // User not found
             setLoginError("Account not found. Please sign up.");
@@ -199,22 +223,22 @@ const LoginPage = () => {
             
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Field */}
+              {/* Identifier Field (Email or Phone) */}
               <div className="relative">
                 <FaUser className="absolute left-3 top-3 text-gray-500" />
                 <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  value={formData.email}
+                  type="text"
+                  name="identifier"
+                  placeholder="Email or Phone Number"
+                  value={formData.identifier}
                   onChange={handleChange}
                   className={`w-full pl-10 pr-4 py-2.5 rounded-md border ${
-                    errors.email ? "border-red-500" : "border-gray-300"
+                    errors.identifier ? "border-red-500" : "border-gray-300"
                   } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
                   required
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                {errors.identifier && (
+                  <p className="text-red-500 text-sm mt-1">{errors.identifier}</p>
                 )}
               </div>
               
