@@ -6,7 +6,7 @@ const User = require('../models/User');
 exports.login = async (req, res) => {
   try {
     console.log('Login attempt with:', req.body);
-    const { email, password, userType } = req.body;
+    const { email, password } = req.body;
     
     // Convert email to lowercase
     const emailLowerCase = email.toLowerCase();
@@ -21,12 +21,6 @@ exports.login = async (req, res) => {
     if (!user) {
       console.log('User not found');
       return res.status(404).json({ msg: 'User not found' });
-    }
-    
-    // If userType is specified, check if it matches (except for 'standard')
-    if (userType && user.userType !== 'standard' && user.userType !== userType) {
-      console.log('User type mismatch');
-      return res.status(400).json({ msg: 'Invalid user type' });
     }
     
     // Compare password
