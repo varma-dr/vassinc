@@ -8,8 +8,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
-    password: "",
-    userType: ""
+    password: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -70,11 +69,6 @@ const LoginPage = () => {
       newErrors.password = "Password should be at least 6 characters long";
     }
     
-    // Validate user type
-    if (!formData.userType) {
-      newErrors.userType = "Please select a user type";
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -100,19 +94,18 @@ const LoginPage = () => {
       setLoginError("");
       
       try {
-        // Make API call to login endpoint
+        // Make API call to login endpoint (without userType)
         const response = await axios.post('http://localhost:5005/api/auth/login', {
           email: formData.email,
-          password: formData.password,
-          userType: formData.userType
+          password: formData.password
         });
         
         // Store token in localStorage (or sessionStorage if remember me is not checked)
         const storage = rememberMe ? localStorage : sessionStorage;
         storage.setItem('token', response.data.token);
         
-        // Store user type for future reference
-        storage.setItem('userType', formData.userType);
+        // Store user type from the response
+        storage.setItem('userType', response.data.userType);
         
         // If successful login
         console.log('Login successful', response.data);
@@ -249,27 +242,6 @@ const LoginPage = () => {
                 </button>
                 {errors.password && (
                   <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                )}
-              </div>
-              
-              {/* User Type Dropdown */}
-              <div className="relative">
-                <select
-                  name="userType"
-                  value={formData.userType}
-                  onChange={handleChange}
-                  className={`w-full pl-4 pr-4 py-2.5 rounded-md border ${
-                    errors.userType ? "border-red-500" : "border-gray-300"
-                  } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
-                >
-                  <option value="">Select User Type</option>
-                  <option value="candidate">Candidate</option>
-                  <option value="recruiter">Recruiter</option>
-                  <option value="employee">Employee</option>
-                  <option value="admin">Admin</option>
-                </select>
-                {errors.userType && (
-                  <p className="text-red-500 text-sm mt-1">{errors.userType}</p>
                 )}
               </div>
               
