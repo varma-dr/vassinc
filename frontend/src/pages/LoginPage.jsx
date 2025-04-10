@@ -106,20 +106,12 @@ const LoginPage = () => {
       setLoginError("");
       
       try {
-        // Determine if the identifier is an email or phone
-        const identifierField = identifierType(formData.identifier);
-        
-        // Create appropriate payload based on identifier type
+        // Create the payload with the email field for backward compatibility
+        // The backend is still expecting 'email' even for phone numbers
         const payload = {
+          email: formData.identifier, // Use the identifier as email for now
           password: formData.password
         };
-        
-        // Add the identifier with the correct field name
-        if (identifierField === "email") {
-          payload.email = formData.identifier;
-        } else {
-          payload.phone = formData.identifier;
-        }
         
         // Make API call to login endpoint
         const response = await axios.post('http://localhost:5005/api/auth/login', payload);

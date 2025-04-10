@@ -6,18 +6,43 @@ const User = require('../models/User');
 exports.login = async (req, res) => {
   try {
     console.log('Login attempt with:', req.body);
-    const { email, password } = req.body;
+    const { email, phone, password, identifier } = req.body;
     
-    // Convert email to lowercase
-    const emailLowerCase = email.toLowerCase();
+    // Determine which identifier to use (support both new and old formats)
+    let searchEmail = email;
+    let searchPhone = phone;
     
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ msg: 'Please provide email and password' });
+    // If identifier is provided (new format), use it appropriately
+    if (identifier) {
+      if (identifier.includes('@')) {
+        searchEmail = identifier;
+      } else {
+        searchPhone = identifier;
+      }
     }
     
-    // Check if user exists (case-insensitive email check)
-    const user = await User.findOne({ email: { $regex: new RegExp(`^${emailLowerCase}$`, 'i') } });
+    // Validate input
+    if ((!searchEmail && !searchPhone) || !password) {
+      return res.status(400).json({ msg: 'Please provide email/phone and password' });
+    }
+
+    let user;
+    
+    // Try to find user by email first if available
+    if (searchEmail) {
+      // Convert email to lowercase
+      const emailLowerCase = searchEmail.toLowerCase();
+      
+      // Check if user exists (case-insensitive email check)
+      user = await User.findOne({ email: { $regex: new RegExp(`^${emailLowerCase}$`, 'i') } });
+    }
+    
+    // If no user found by email and phone is available, try phone
+    if (!user && searchPhone) {
+      user = await User.findOne({ phone: searchPhone });
+    }
+    
+    // If user not found with either method
     if (!user) {
       console.log('User not found');
       return res.status(404).json({ msg: 'User not found' });
@@ -52,6 +77,7 @@ exports.login = async (req, res) => {
           console.error('JWT signing error:', err);
           return res.status(500).json({ msg: 'Error creating authentication token' });
         }
+        
         console.log('Login successful');
         res.json({
           token,
@@ -60,7 +86,8 @@ exports.login = async (req, res) => {
             id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
-            email: user.email
+            email: user.email,
+            phone: user.phone
           }
         });
       }
