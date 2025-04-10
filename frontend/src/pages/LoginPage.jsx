@@ -20,8 +20,8 @@ const LoginPage = () => {
   // Email validation regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   
-  // Phone validation regex (basic international format)
-  const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+  // Phone validation regex (exactly 10 digits)
+  const phoneRegex = /^\d{10}$/;
 
   // Set the page title dynamically
   useEffect(() => {
@@ -36,6 +36,15 @@ const LoginPage = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // For identifier field, enforce 10-digit limit for phone numbers
+    if (name === "identifier" && !value.includes('@') && /^\d+$/.test(value)) {
+      // If it's numeric (likely a phone number), limit to 10 digits
+      if (value.length > 10) {
+        return; // Don't update if exceeding 10 digits
+      }
+    }
+    
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value
@@ -56,8 +65,8 @@ const LoginPage = () => {
   };
 
   const identifierType = (identifier) => {
-    if (emailRegex.test(identifier)) return "email";
-    if (phoneRegex.test(identifier)) return "phone";
+    if (identifier.includes('@')) return "email";
+    if (/^\d{10}$/.test(identifier)) return "phone";
     return null;
   };
 
@@ -221,13 +230,23 @@ const LoginPage = () => {
                 <input
                   type="text"
                   name="identifier"
-                  placeholder="Email or Phone Number"
+                                      placeholder="Email or Phone Number"
                   value={formData.identifier}
                   onChange={handleChange}
                   className={`w-full pl-10 pr-4 py-2.5 rounded-md border ${
                     errors.identifier ? "border-red-500" : "border-gray-300"
                   } bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none text-gray-700`}
-                  required
+                  onKeyDown={(e) => {
+                    // If it's a phone number (all digits) and already at 10 digits
+                    const value = e.target.value;
+                    if (!value.includes('@') && /^\d+$/.test(value) && value.length >= 10 && 
+                        // Allow Delete, Backspace, Tab, Arrows
+                        !['Delete', 'Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) &&
+                        // Prevent standard number keys and numpad
+                        ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105))) {
+                      e.preventDefault();
+                    }
+                  }}
                 />
                 {errors.identifier && (
                   <p className="text-red-500 text-sm mt-1">{errors.identifier}</p>

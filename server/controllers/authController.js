@@ -6,40 +6,31 @@ const User = require('../models/User');
 exports.login = async (req, res) => {
   try {
     console.log('Login attempt with:', req.body);
-    const { email, phone, password, identifier } = req.body;
+    const { email, password } = req.body;
     
-    // Determine which identifier to use (support both new and old formats)
-    let searchEmail = email;
-    let searchPhone = phone;
-    
-    // If identifier is provided (new format), use it appropriately
-    if (identifier) {
-      if (identifier.includes('@')) {
-        searchEmail = identifier;
-      } else {
-        searchPhone = identifier;
-      }
-    }
-    
-    // Validate input
-    if ((!searchEmail && !searchPhone) || !password) {
-      return res.status(400).json({ msg: 'Please provide email/phone and password' });
-    }
-
     let user;
     
-    // Try to find user by email first if available
-    if (searchEmail) {
-      // Convert email to lowercase
-      const emailLowerCase = searchEmail.toLowerCase();
+    // Check if input is an email or phone by looking for @ symbol
+    const isEmail = email && email.includes('@');
+    
+    if (isEmail) {
+      // Process as email
+      const emailLowerCase = email.toLowerCase();
       
       // Check if user exists (case-insensitive email check)
       user = await User.findOne({ email: { $regex: new RegExp(`^${emailLowerCase}$`, 'i') } });
+    } else {
+      // Process as phone number
+      // Remove any non-digit characters for consistent lookup
+      const cleanPhone = email.replace(/\D/g, '');
+      
+      console.log('Looking up user by phone:', cleanPhone);
+      user = await User.findOne({ phone: cleanPhone });
     }
     
-    // If no user found by email and phone is available, try phone
-    if (!user && searchPhone) {
-      user = await User.findOne({ phone: searchPhone });
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ msg: 'Please provide email/phone and password' });
     }
     
     // If user not found with either method
