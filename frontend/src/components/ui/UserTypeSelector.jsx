@@ -31,15 +31,20 @@ const UserTypeSelector = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [token, setToken] = useState("");
 
-    // Get token from localStorage on component mount
+    // Modified useEffect for testing - allows bypassing the login check
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
         if (!storedToken) {
-            // Redirect to login if no token is found
-            navigate("/login");
-            return;
+            // TEMPORARY CODE FOR TESTING - REMOVE BEFORE PRODUCTION
+            console.log("Setting temporary token for testing");
+            localStorage.setItem("token", "temporary-test-token");
+            setToken("temporary-test-token");
+            // Comment out the redirect
+            // navigate("/login");
+            // return;
+        } else {
+            setToken(storedToken);
         }
-        setToken(storedToken);
     }, [navigate]);
 
     const userTypes = [
