@@ -8,6 +8,11 @@ exports.login = async (req, res) => {
     console.log('Login attempt with:', req.body);
     const { email, password } = req.body;
     
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ msg: 'Please provide email/phone and password' });
+    }
+
     let user;
     
     // Check if input is an email or phone by looking for @ symbol
@@ -19,24 +24,58 @@ exports.login = async (req, res) => {
       
       // Check if user exists (case-insensitive email check)
       user = await User.findOne({ email: { $regex: new RegExp(`^${emailLowerCase}$`, 'i') } });
+      
+      // Log the query result
+      console.log('Email lookup result:', user ? 'User found' : 'User not found');
     } else {
       // Process as phone number
       // Remove any non-digit characters for consistent lookup
       const cleanPhone = email.replace(/\D/g, '');
       
       console.log('Looking up user by phone:', cleanPhone);
-      user = await User.findOne({ phone: cleanPhone });
-    }
-    
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ msg: 'Please provide email/phone and password' });
+      
+      // Try multiple ways to find the user by phone
+      // Some systems store with formatting, some without
+      const phoneQueries = [
+        { phone: cleanPhone },
+        { phone: cleanPhone.toString() }
+      ];
+      
+      // Try each query until a user is found
+      for (const query of phoneQueries) {
+        user = await User.findOne(query);
+        if (user) break;
+      }
+      
+      // If still not found, do a more flexible search
+      if (!user) {
+        // Find all users and check phone numbers
+        const allUsers = await User.find({});
+        console.log('All users in system:', allUsers.length);
+        console.log('Sample of users:', allUsers.slice(0, 3).map(u => ({ 
+          id: u._id, 
+          email: u.email,
+          phone: u.phone || 'No phone',
+          phoneType: u.phone ? typeof u.phone : 'N/A'
+        })));
+        
+        // Look for matching phone manually (helps debug issues with data types)
+        user = allUsers.find(u => {
+          if (!u.phone) return false;
+          const userPhone = u.phone.toString().replace(/\D/g, '');
+          return userPhone === cleanPhone;
+        });
+        
+        console.log('Manual phone lookup result:', user ? 'User found' : 'User not found');
+      } else {
+        console.log('Database query found user with phone:', user.phone);
+      }
     }
     
     // If user not found with either method
     if (!user) {
       console.log('User not found');
-      return res.status(404).json({ msg: 'User not found' });
+      return res.status(404).json({ msg: 'User not found. The phone number may not be registered.' });
     }
     
     // Compare password
