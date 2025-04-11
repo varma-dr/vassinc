@@ -1,19 +1,23 @@
 import React, { useState } from "react";
 
 export const LeavePanel = () => {
+  const today = new Date().toISOString().split("T")[0];
+
   const [formData, setFormData] = useState({
     reason: "",
-    fromDate: "",
-    toDate: "",
     attachment: null,
   });
-  const [status, setStatus] = useState("Pending");
+  const [status, setStatus] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: files ? files[0] : value,
+      ...(name === "fromDate" && {
+        toDate: value > prev.toDate ? value : prev.toDate,
+      }),
     }));
   };
 
@@ -22,13 +26,15 @@ export const LeavePanel = () => {
     const { reason, fromDate, toDate } = formData;
 
     if (!reason || !fromDate || !toDate) {
+      setStatus("");
+      setSubmitted(false);
       alert("Reason and date fields are mandatory.");
       return;
     }
 
     // Simulate approval logic
     setStatus("Pending");
-    alert("Leave application submitted successfully!");
+    setSubmitted(true);
   };
 
   return (
@@ -61,6 +67,7 @@ export const LeavePanel = () => {
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
               required
+              min={today}
             />
           </div>
 
@@ -73,6 +80,7 @@ export const LeavePanel = () => {
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
               required
+              min={formData.fromDate || today}
             />
           </div>
         </div>
@@ -94,22 +102,28 @@ export const LeavePanel = () => {
         >
           Submit Leave Request
         </button>
+
+        {submitted && (
+          <p className="text-green-600 font-medium mt-2">Leave request submitted successfully!</p>
+        )}
       </form>
 
-      <div className="text-sm text-gray-700">
-        <span className="font-semibold">Leave Status:</span>{" "}
-        <span
-          className={`${
-            status === "Approved"
-              ? "text-green-600"
-              : status === "Rejected"
-              ? "text-red-600"
-              : "text-yellow-600"
-          } font-medium`}
-        >
-          {status}
-        </span>
-      </div>
+      {status && (
+        <div className="text-sm text-gray-700">
+          <span className="font-semibold">Leave Status:</span>{" "}
+          <span
+            className={`$ {
+              status === "Approved"
+                ? "text-green-600"
+                : status === "Rejected"
+                ? "text-red-600"
+                : "text-yellow-600"
+            } font-medium`}
+          >
+            {status}
+          </span>
+        </div>
+      )}
     </div>
   );
 };
