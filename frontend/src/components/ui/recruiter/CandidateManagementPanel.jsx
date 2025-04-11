@@ -1,5 +1,11 @@
+// components/ui/recruiter/CandidateManagementPanel.jsx
 import React, { useState } from "react";
-import { MessageSquare, User, FilePlus2, CalendarClock, ChevronDown } from "lucide-react";
+import {
+  MessageSquare,
+  User,
+  FilePlus2,
+  CalendarClock,
+} from "lucide-react";
 
 const dummyCandidates = [
   {
@@ -10,15 +16,17 @@ const dummyCandidates = [
     active: true,
     submissions: 4,
     priority: true,
+    assignedTo: "You",
   },
   {
     id: 2,
     name: "Ravi Kumar",
     specialization: "Backend Developer",
-    visa: "F1",
+    visa: "F1-OPT",
     active: false,
     submissions: 2,
     priority: false,
+    assignedTo: "Other Recruiter",
   },
   {
     id: 3,
@@ -28,6 +36,7 @@ const dummyCandidates = [
     active: true,
     submissions: 5,
     priority: true,
+    assignedTo: "You",
   },
 ];
 
@@ -40,12 +49,15 @@ export const CandidateManagementPanel = () => {
       (c) =>
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.specialization.toLowerCase().includes(search.toLowerCase()) ||
-        c.visa.toLowerCase().includes(search.toLowerCase())
+        c.visa.toLowerCase().includes(search.toLowerCase()) ||
+        c.assignedTo.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => {
+      if (a.assignedTo === "You" && b.assignedTo !== "You") return -1;
+      if (a.assignedTo !== "You" && b.assignedTo === "You") return 1;
       if (sortBy === "status") return b.active - a.active;
       if (sortBy === "submissions") return b.submissions - a.submissions;
-      return b.id - a.id; // default newest
+      return b.id - a.id; // newest first
     });
 
   return (
@@ -55,7 +67,7 @@ export const CandidateManagementPanel = () => {
       <div className="flex flex-wrap gap-4 items-center">
         <input
           type="text"
-          placeholder="Search by name, skills, visa..."
+          placeholder="Search by name, role, visa, activity..."
           className="p-2 border rounded w-60"
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -74,7 +86,7 @@ export const CandidateManagementPanel = () => {
         {filteredCandidates.map((c) => (
           <div
             key={c.id}
-            className={`border rounded-2xl p-4 shadow bg-white relative`}
+            className="border rounded-2xl p-4 shadow bg-white relative"
           >
             {c.priority && (
               <span className="absolute top-2 right-2 text-xs bg-red-500 text-white px-2 py-1 rounded-full">
@@ -99,32 +111,15 @@ export const CandidateManagementPanel = () => {
             <div className="text-sm text-gray-700 space-y-1 mb-4">
               <div>Visa Status: <span className="font-medium">{c.visa}</span></div>
               <div>
-                Activity:{" "}
-                <span
-                  className={`font-medium ${
-                    c.active ? "text-green-600" : "text-gray-400"
-                  }`}
-                >
+                Activity: <span className={`font-medium ${c.active ? "text-green-600" : "text-gray-400"}`}>
                   {c.active ? "Active" : "Inactive"}
                 </span>
               </div>
               <div>Submissions: {c.submissions}</div>
+              <div>Assigned To: <span className="font-medium">{c.assignedTo}</span></div>
             </div>
 
-            <div className="flex justify-between gap-2 mt-2">
-              <button className="text-sm bg-gray-100 hover:bg-gray-200 rounded px-2 py-1 flex items-center gap-1">
-                <User size={16} /> View Profile
-              </button>
-              <button className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded px-2 py-1 flex items-center gap-1">
-                <FilePlus2 size={16} /> Submit
-              </button>
-              <button className="text-sm bg-green-100 hover:bg-green-200 text-green-700 rounded px-2 py-1 flex items-center gap-1">
-                <CalendarClock size={16} /> Interview
-              </button>
-              <button className="text-sm bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded px-2 py-1 flex items-center gap-1">
-                <MessageSquare size={16} /> Message
-              </button>
-            </div>
+            
           </div>
         ))}
       </div>
