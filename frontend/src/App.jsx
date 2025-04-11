@@ -4,6 +4,8 @@ import SignUpForm from "./components/auth/SignUpForm";
 import LoginPage from "./pages/LoginPage";
 import UserTypeSelector from "./components/ui/UserTypeSelector";
 import CandidateDashboard from "./components/ui/CandidateDashboard";
+import RecruiterDashboard from "./components/ui/RecruiterDashboard";
+
 
 const App = () => {
     return (
@@ -15,6 +17,9 @@ const App = () => {
                 
                 {/* Original route - keep this */}
                 <Route path="/UserTypeSelector" element={<UserTypeSelector />} />
+                <Route path="/recruiterdashboard" element={<RecruiterDashboard />} />
+
+                
                 
                 {/* Additional route options for better URL convention */}
                 <Route path="/usertypeselector" element={<UserTypeSelector />} />
