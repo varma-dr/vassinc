@@ -21,11 +21,15 @@ const statusOptions = [
 
 const visaOptions = ["H1B", "F1-OPT", "L2", "GC", "USC"];
 
+// Set a reasonable maximum hourly rate
+const MAX_HOURLY_RATE = 500;
+
 export const SubmissionsPanel = () => {
   const [selectedCandidate, setSelectedCandidate] = useState("");
   const [submissions, setSubmissions] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [filterText, setFilterText] = useState("");
+  const [rateError, setRateError] = useState("");
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -46,34 +50,80 @@ export const SubmissionsPanel = () => {
       },
     ]);
     setEditingIndex(submissions.length);
+    setRateError("");
   };
 
   const updateField = (index, field, value) => {
-    const updated = [...submissions];
+    // If updating the rate field, validate the input
     if (field === "rate") {
-      updated[index][field] = value ? `$${value}/HR` : "";
-    } else {
-      updated[index][field] = value;
+      // Clear previous error
+      setRateError("");
+      
+      // Check if the input contains a decimal point
+      if (value.includes('.')) {
+        setRateError("Only whole numbers are allowed");
+        return;
+      }
+      
+      // Check if the rate is within acceptable limits
+      const numericValue = parseInt(value, 10);
+      
+      if (value && (isNaN(numericValue) || numericValue <= 0)) {
+        setRateError("Rate must be a positive whole number");
+        return;
+      }
+      
+      if (numericValue > MAX_HOURLY_RATE) {
+        setRateError(`Rate cannot exceed ${MAX_HOURLY_RATE}/HR`);
+        return;
+      }
+      
+      // Format the rate
+      value = value ? `${numericValue}/HR` : "";
     }
+    
+    const updated = [...submissions];
+    updated[index][field] = value;
     setSubmissions(updated);
   };
 
   const saveSubmission = (index) => {
     const item = submissions[index];
+    
+    // Check for rate error
+    if (rateError) {
+      alert(`Please fix the rate error: ${rateError}`);
+      return;
+    }
+    
+    // Make sure all fields are filled
     const allFilled = Object.values(item).every((v) => v !== "");
-    if (!allFilled) return alert("Please fill all fields before saving.");
+    if (!allFilled) {
+      alert("Please fill all fields before saving.");
+      return;
+    }
+    
     setEditingIndex(null);
+    setRateError("");
   };
 
   const deleteSubmission = (index) => {
     const updated = [...submissions];
     updated.splice(index, 1);
     setSubmissions(updated);
+    setRateError("");
   };
 
   const filteredSubmissions = submissions.filter((s) =>
     s.company.toLowerCase().includes(filterText.toLowerCase())
   );
+  
+  // Extract numeric value from rate string for input display
+  const extractRateValue = (rateString) => {
+    if (!rateString) return "";
+    const match = rateString.match(/\$?(\d+)/);
+    return match ? match[1] : "";
+  };
 
   return (
     <div className="space-y-4">
@@ -160,13 +210,20 @@ export const SubmissionsPanel = () => {
                           ))}
                         </select>
                       ) : field === "rate" ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={sub[field].replace(/\$|\/HR/g, "")}
-                          onChange={(e) => updateField(index, field, e.target.value)}
-                          className="border rounded p-1 w-full"
-                        />
+                        <div>
+                          <input
+                            type="number"
+                            min="1"
+                            max={MAX_HOURLY_RATE}
+                            step="1"
+                            value={extractRateValue(sub[field])}
+                            onChange={(e) => updateField(index, field, e.target.value)}
+                            className={`border rounded p-1 w-full ${rateError ? 'border-red-500' : ''}`}
+                          />
+                          {rateError && editingIndex === index && field === "rate" && (
+                            <div className="text-red-500 text-xs mt-1">{rateError}</div>
+                          )}
+                        </div>
                       ) : field === "date" ? (
                         <div className="flex items-center gap-1">
                           <input
