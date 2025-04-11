@@ -23,6 +23,7 @@ function RecruiterDashboard() {
     else setGreeting("Good Evening");
   }, []);
 
+
   const renderPanel = () => {
     switch (activePanel) {
       case "dashboard":

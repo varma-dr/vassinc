@@ -1,11 +1,12 @@
+// components/ui/recruiter/SubmissionsPanel.jsx
 import React, { useState } from "react";
 import {
   Pencil,
   Trash2,
   Save,
   Plus,
-  ChevronDown,
   Search,
+  Calendar,
 } from "lucide-react";
 
 const candidates = ["Alice Johnson", "Bob Singh", "Carla Mehta"];
@@ -18,11 +19,15 @@ const statusOptions = [
   { value: "Rejected", icon: "❌" },
 ];
 
+const visaOptions = ["H1B", "F1-OPT", "L2", "GC", "USC"];
+
 export const SubmissionsPanel = () => {
   const [selectedCandidate, setSelectedCandidate] = useState("");
   const [submissions, setSubmissions] = useState([]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [filterText, setFilterText] = useState("");
+
+  const today = new Date().toISOString().split("T")[0];
 
   const addSubmission = () => {
     if (!selectedCandidate) return alert("Please select a candidate first");
@@ -30,7 +35,7 @@ export const SubmissionsPanel = () => {
       ...submissions,
       {
         candidate: selectedCandidate,
-        date: "",
+        date: today,
         company: "",
         position: "",
         location: "",
@@ -45,7 +50,11 @@ export const SubmissionsPanel = () => {
 
   const updateField = (index, field, value) => {
     const updated = [...submissions];
-    updated[index][field] = value;
+    if (field === "rate") {
+      updated[index][field] = value ? `$${value}/HR` : "";
+    } else {
+      updated[index][field] = value;
+    }
     setSubmissions(updated);
   };
 
@@ -112,7 +121,7 @@ export const SubmissionsPanel = () => {
                 "Visa",
                 "Status",
                 "Vendor",
-                "Rate",
+                "Rate ($/HR)",
                 "Actions",
               ].map((h) => (
                 <th key={h} className="px-4 py-2">
@@ -124,24 +133,13 @@ export const SubmissionsPanel = () => {
           <tbody>
             {filteredSubmissions.map((sub, index) => (
               <tr key={index} className="border-t">
-                {[
-                  "date",
-                  "company",
-                  "position",
-                  "location",
-                  "visa",
-                  "status",
-                  "vendor",
-                  "rate",
-                ].map((field) => (
+                {["date", "company", "position", "location", "visa", "status", "vendor", "rate"].map((field) => (
                   <td key={field} className="px-4 py-2">
                     {editingIndex === index ? (
                       field === "status" ? (
                         <select
                           value={sub[field]}
-                          onChange={(e) =>
-                            updateField(index, field, e.target.value)
-                          }
+                          onChange={(e) => updateField(index, field, e.target.value)}
                           className="border rounded p-1"
                         >
                           {statusOptions.map((s) => (
@@ -150,24 +148,51 @@ export const SubmissionsPanel = () => {
                             </option>
                           ))}
                         </select>
+                      ) : field === "visa" ? (
+                        <select
+                          value={sub[field]}
+                          onChange={(e) => updateField(index, field, e.target.value)}
+                          className="border rounded p-1"
+                        >
+                          <option value="">Select Visa</option>
+                          {visaOptions.map((v) => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
+                      ) : field === "rate" ? (
+                        <input
+                          type="number"
+                          min="0"
+                          value={sub[field].replace(/\$|\/HR/g, "")}
+                          onChange={(e) => updateField(index, field, e.target.value)}
+                          className="border rounded p-1 w-full"
+                        />
+                      ) : field === "date" ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="date"
+                            min={today}
+                            value={sub[field]}
+                            onChange={(e) => updateField(index, field, e.target.value)}
+                            className="border rounded p-1"
+                          />
+                          <button
+                            onClick={() => updateField(index, field, today)}
+                            className="text-xs text-blue-500 underline"
+                          >
+                            Today
+                          </button>
+                        </div>
                       ) : (
                         <input
                           type="text"
                           value={sub[field]}
-                          onChange={(e) =>
-                            updateField(index, field, e.target.value)
-                          }
+                          onChange={(e) => updateField(index, field, e.target.value)}
                           className="border rounded p-1 w-full"
                         />
                       )
                     ) : field === "status" ? (
-                      <>
-                        {
-                          statusOptions.find((s) => s.value === sub.status)
-                            ?.icon
-                        }{" "}
-                        {sub.status}
-                      </>
+                      <>{statusOptions.find((s) => s.value === sub.status)?.icon} {sub.status}</>
                     ) : (
                       sub[field]
                     )}
@@ -175,24 +200,15 @@ export const SubmissionsPanel = () => {
                 ))}
                 <td className="px-4 py-2 flex gap-2">
                   {editingIndex === index ? (
-                    <button
-                      onClick={() => saveSubmission(index)}
-                      className="text-green-600"
-                    >
+                    <button onClick={() => saveSubmission(index)} className="text-green-600">
                       <Save size={18} />
                     </button>
                   ) : (
-                    <button
-                      onClick={() => setEditingIndex(index)}
-                      className="text-blue-600"
-                    >
+                    <button onClick={() => setEditingIndex(index)} className="text-blue-600">
                       <Pencil size={18} />
                     </button>
                   )}
-                  <button
-                    onClick={() => deleteSubmission(index)}
-                    className="text-red-600"
-                  >
+                  <button onClick={() => deleteSubmission(index)} className="text-red-600">
                     <Trash2 size={18} />
                   </button>
                 </td>
@@ -200,10 +216,7 @@ export const SubmissionsPanel = () => {
             ))}
             {filteredSubmissions.length === 0 && (
               <tr>
-                <td
-                  colSpan={9}
-                  className="text-center py-4 text-gray-500 italic"
-                >
+                <td colSpan={9} className="text-center py-4 text-gray-500 italic">
                   No submissions found.
                 </td>
               </tr>
