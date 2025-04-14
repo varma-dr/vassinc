@@ -1,4 +1,3 @@
-// components/ui/candidate/Sidebar.jsx
 import React from "react";
 import Logo from "../../../assets/VassInc_logo.png";
 import {
@@ -8,7 +7,7 @@ import {
   Users
 } from "lucide-react";
 
-const Sidebar = ({ setActivePanel, greeting }) => {
+const Sidebar = ({ setActivePanel, greeting, name }) => {
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard /> },
     { id: "submissions", label: "Submissions", icon: <FileText /> },
@@ -21,7 +20,9 @@ const Sidebar = ({ setActivePanel, greeting }) => {
       {/* Logo and greeting */}
       <div className="mb-10 text-center">
         <img src={Logo} alt="Company Logo" className="h-16 mx-auto" />
-        <p className="text-lg font-semibold mt-2">{greeting}, Candidate!</p>
+        <p className="text-lg font-semibold mt-2">
+          {greeting}, {name || "Candidate"}!
+        </p>
       </div>
 
       {/* Navigation */}

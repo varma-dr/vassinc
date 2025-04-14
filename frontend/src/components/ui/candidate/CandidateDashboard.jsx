@@ -21,6 +21,8 @@ const CandidateDashboard = () => {
     else setGreeting("Good Evening");
   }, []);
 
+
+
   const initials = `${userInfo.firstName[0] || ""}${userInfo.lastName[0] || ""}`.toUpperCase();
 
   const renderPanel = () => {
@@ -45,7 +47,7 @@ const CandidateDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar setActivePanel={setActivePanel} greeting={greeting} />
+      <Sidebar setActivePanel={setActivePanel} greeting={greeting} name={userInfo.firstName} />
       
       <div className="flex-1 flex flex-col overflow-y-auto">
         <div className="flex justify-end p-4 relative">
