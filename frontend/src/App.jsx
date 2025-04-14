@@ -3,10 +3,8 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import SignUpForm from "./components/auth/SignUpForm";
 import LoginPage from "./pages/LoginPage";
 import UserTypeSelector from "./components/ui/UserTypeSelector";
-import RecruiterDashboard from "./components/ui/RecruiterDashboard";
 import CandidateDashboard from "./components/ui/Candidate/CandidateDashboard";
-
-
+import RecruiterDashboard from "./components/ui/recruiter/RecruiterDashboard";
 
 
 const App = () => {
