@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "./recruiter/Sidebar";
-import { DashboardPanel } from "./recruiter/DashboardPanel";
-import { SubmissionsPanel } from "./recruiter/SubmissionsPanel";
-import { CandidateManagementPanel } from "./recruiter/CandidateManagementPanel";
-import { LeavePanel } from "./recruiter/LeavePanel";
-import { RecruiterInfoPanel } from "./recruiter/RecruiterInfoPanel";
+import Sidebar from "./Sidebar";
+import { DashboardPanel } from "./DashboardPanel";
+import { SubmissionsPanel } from "./SubmissionsPanel";
+import { CandidateManagementPanel } from "./CandidateManagementPanel";
+import { LeavePanel } from "./LeavePanel";
+import { RecruiterInfoPanel } from "./RecruiterInfoPanel";
 import { UserCircle, LogOut } from "lucide-react";
 
 
